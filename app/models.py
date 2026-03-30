@@ -1,0 +1,71 @@
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from .database import Base
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    email = Column(String, unique=True)
+    password = Column(String)
+    location = Column(String)
+    profile_picture = Column(String(255), nullable=True)
+    phone_number = Column(String(15), nullable=False)
+
+
+class FarmInfo(Base):
+    __tablename__ = "farm_info"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    farm_type = Column(String)
+    farm_size = Column(Float)
+    soil_type = Column(String)
+    water_source = Column(String)
+
+    
+
+class CropInput(Base):
+    __tablename__ = "crop_inputs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    nitrogen = Column(Float)
+    phosphorus = Column(Float)
+    potassium = Column(Float)
+    temperature = Column(Float)
+    humidity = Column(Float)
+    ph = Column(Float)
+    rainfall = Column(Float)
+    agro_environmental_zone = Column(String)
+
+
+class RecommendedCrop(Base):
+    __tablename__ = "recommended_crops"
+
+    id = Column(Integer, primary_key=True, index=True)
+    crop_input_id = Column(Integer, ForeignKey("crop_inputs.id"))
+    crop_name = Column(String)
+
+class PriceInput (Base):
+    __tablename__ = "price_inputs"
+    id = Column (Integer, primary_key =True, index = True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    state = Column(String)
+    # Use lowercase DB column name to avoid case-sensitive identifier issues.
+    lga = Column("lga", String)
+    market = Column(String)
+    pricetype = Column(String)
+    category = Column(String)
+    commodity = Column(String)
+    quantity = Column(Float)
+    unit = Column (String)
+    year = Column(Integer)
+    month = Column(Integer)
+    day = Column(Integer)
+
+class PricePrediction(Base):
+    __tablename__ = "predicted_prices"
+    id = Column(Integer, primary_key=True, index=True)
+    price_input_id = Column(Integer, ForeignKey("price_inputs.id"))
+    predicted_price = Column(Float)

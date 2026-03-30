@@ -1,0 +1,489 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>AgroSense | Smart Farm Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23238c5d' d='M54 10C34 11 20 21 14 37c-4 10 0 17 8 17 15 0 28-13 32-44zM16 49c4-3 9-7 14-12 5-5 10-12 14-20-14 5-24 14-28 24-1 3-1 6 0 8z'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="pstyles.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>AgroSense</span>
+                </a>
+                <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item active">
+                        <a href="#" class="nav-link" data-page="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="recommendation">
+                            <i class="fas fa-seedling"></i>
+                            <span>Crop Recommendation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="price-prediction">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Price Prediction</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="market-analysis">
+                            <i class="fas fa-chart-simple"></i>
+                            <span>Market Price Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="history">
+                            <i class="fas fa-history"></i>
+                            <span>History Page</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="profile">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Profile Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="sidebar-footer">
+                    <a href="#" class="nav-link logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Top Navbar -->
+            <header class="dashboard-header">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-user">
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info">
+                            <div class="user-details">
+                                <span class="user-name" id="userName">John Farmer</span>
+                            </div>
+                            <i class="fas fa-chevron-down dropdown-icon"></i>
+                        </div>
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item" data-page="profile">
+                                <i class="fas fa-user-cog"></i>
+                                <span>Profile Settings</span>
+                            </a>
+                            <a href="#" class="dropdown-item" id="dropdownLogout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Welcome Dashboard (Default View) -->
+                <div class="content-page active" id="page-dashboard">
+                    <div class="welcome-section">
+                        <div class="welcome-top">
+                            <div class="welcome-badge">
+                                <i class="fas fa-leaf"></i>
+                                <span>AgroSense Dashboard</span>
+                            </div>
+                            <div class="welcome-status">
+                                <i class="fas fa-circle"></i>
+                                <span>System Online</span>
+                            </div>
+                        </div>
+                        <h1 class="welcome-title">Welcome back, <span id="welcomeFarmerName">Farmer</span></h1>
+                        <div class="welcome-message-flow" aria-live="polite">
+                            <i class="fas fa-wave-square"></i>
+                            <span id="dynamicWelcomeMessage" class="message-text">Review your profile data before starting new recommendations.</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-overview">
+                        <div class="profile-card">
+                            <div class="profile-avatar-section">
+                                <div class="profile-avatar-large" id="profileAvatarLarge">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <button class="btn-upload" id="uploadAvatarBtn">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Upload Profile Picture</span>
+                                </button>
+                                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                            </div>
+                            <div class="profile-info">
+                                <h3>Farmer Information</h3>
+                                <div class="info-columns" id="farmerDetailsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="onboarding-section">
+                        <div class="quick-actions-row">
+                            <div class="market-signal-panel">
+                                <h2 class="section-title">Insights</h2>
+                                <div class="market-signal-content">
+                                    <div class="market-signal-image">
+                                        <img src="images/image-removebg-preview.png" alt="Market signal visual">
+                                    </div>
+                                    <p class="market-signal-text">
+                                        Maize prices are stable this week. Run price forecast before final harvest-sale timing.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="quick-actions-box">
+                                <h2 class="section-title">Quick Actions</h2>
+                                <div class="quick-actions-toolbar">
+                                    <button type="button" class="quick-action-btn" data-action="recommendation">
+                                        <i class="fas fa-seedling"></i>
+                                        <span>Crop Recommendation</span>
+                                    </button>
+                                    <button type="button" class="quick-action-btn" data-action="price-prediction">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Price Forecast</span>
+                                    </button>
+                                    <button type="button" class="quick-action-btn" data-action="market-analysis">
+                                        <i class="fas fa-chart-simple"></i>
+                                        <span>Market Analysis</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placeholder pages for other sections -->
+                <div class="content-page" id="page-recommendation">
+                    <div class="placeholder-page">
+                        <div class="placeholder-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <h2>Crop Recommendation Engine</h2>
+                        <p>Get personalized crop suggestions based on your farm data.</p>
+                        <button class="btn-primary" id="startRecommendationBtn">Start Recommendation</button>
+                        <div class="recommendation-list" id="recommendationList"></div>
+                    </div>
+                </div>
+
+                <div class="content-page" id="page-price-prediction">
+                    <div class="placeholder-page">
+                        <div class="placeholder-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h2>Price Prediction Tool</h2>
+                        <p>Forecast market prices for your crops with AI.</p>
+                        <button class="btn-primary" id="startPredictionBtn">Start Prediction</button>
+                        <div class="prediction-list" id="predictionList"></div>
+                    </div>
+                </div>
+
+                <div class="content-page" id="page-market-analysis">
+                    <div class="placeholder-page">
+                        <div class="placeholder-icon">
+                            <i class="fas fa-chart-simple"></i>
+                        </div>
+                        <h2>Market Price Analysis</h2>
+                        <p>Visualize price trends and make informed selling decisions.</p>
+                        <button class="btn-primary">View Analysis</button>
+                    </div>
+                </div>
+
+                <div class="content-page" id="page-history">
+                    <div class="placeholder-page">
+                        <div class="placeholder-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h2>Your History</h2>
+                        <p>Your past recommendations and predictions will appear here.</p>
+                        <p class="text-muted">Start using the tools to build your history.</p>
+                    </div>
+                </div>
+
+                <div class="content-page" id="page-profile">
+                    <div class="profile-edit-container">
+                        <h2>Profile Settings</h2>
+                        <div class="profile-settings-layout">
+                            <aside class="profile-settings-aside">
+                                <div class="profile-avatar-large profile-avatar-settings" id="profileAvatarLargeForm">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <button class="btn-upload" id="uploadAvatarBtnForm" type="button">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Upload Profile Picture</span>
+                                </button>
+                                <input type="file" id="avatarInputForm" accept="image/*" style="display: none;">
+                            </aside>
+
+                            <div class="profile-settings-form-panel">
+                                <form id="profileEditForm" class="profile-form">
+                                    <div class="form-row">
+                                        <div class="input-group">
+                                            <label>Full Name</label>
+                                            <input type="text" id="editFullName" placeholder="Full name">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Email</label>
+                                            <input type="email" id="editEmail" placeholder="Email" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="input-group">
+                                            <label>Location</label>
+                                            <input type="text" id="editLocation" placeholder="Location">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Phone Number</label>
+                                            <input type="tel" id="editPhoneNumber" placeholder="+2348012345678">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="input-group">
+                                            <label>Farm Type</label>
+                                            <div class="select-shell">
+                                                <select id="editFarmType">
+                                                    <option value="">Select farm type</option>
+                                                    <option value="Crop Farming">Crop Farming</option>
+                                                    <option value="Livestock">Livestock</option>
+                                                    <option value="Mixed Farming">Mixed Farming</option>
+                                                    <option value="Orchard">Orchard</option>
+                                                    <option value="Greenhouse">Greenhouse</option>
+                                                </select>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Farm Size (hectares)</label>
+                                            <input type="number" id="editFarmSize" step="0.1" min="0.1" placeholder="Farm size">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="input-group">
+                                            <label>Soil Type</label>
+                                            <div class="select-shell">
+                                                <select id="editSoilType">
+                                                    <option value="">Select soil type</option>
+                                                    <option value="Clay">Clay</option>
+                                                    <option value="Sandy">Sandy</option>
+                                                    <option value="Silt">Silt</option>
+                                                    <option value="Loam">Loam</option>
+                                                    <option value="Chalky">Chalky</option>
+                                                    <option value="Peaty">Peaty</option>
+                                                </select>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Water Source</label>
+                                            <div class="select-shell">
+                                                <select id="editWaterSource">
+                                                    <option value="">Select water source</option>
+                                                    <option value="Rain-fed">Rain-fed</option>
+                                                    <option value="Irrigation">Irrigation</option>
+                                                    <option value="River">River</option>
+                                                    <option value="Borehole">Borehole</option>
+                                                    <option value="Mixed">Mixed</option>
+                                                </select>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Crop Recommendation Modal -->
+    <div class="recommend-modal hidden" id="recommendModal" aria-hidden="true">
+        <div class="recommend-modal-backdrop" id="recommendModalBackdrop"></div>
+        <div class="recommend-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="recommendModalTitle">
+            <button class="recommend-modal-close" id="recommendModalClose" aria-label="Close recommendation form">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 id="recommendModalTitle">Crop Recommendation Inputs</h3>
+            <p class="recommend-modal-subtitle">Fill all required features to generate a recommendation.</p>
+
+            <form id="recommendForm" class="recommend-form" novalidate>
+                <div class="recommend-form-grid">
+                    <div class="input-group">
+                        <label for="nitrogenInput">Nitrogen (kg/ha)</label>
+                        <input type="number" id="nitrogenInput" step="0.01" min="0" placeholder="e.g. 50.0" required>
+                        <small class="field-error" id="nitrogenError"></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="phosphorusInput">Phosphorus (kg/ha)</label>
+                        <input type="number" id="phosphorusInput" step="0.01" min="0" placeholder="e.g. 30.0" required>
+                        <small class="field-error" id="phosphorusError"></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="potassiumInput">Potassium (kg/ha)</label>
+                        <input type="number" id="potassiumInput" step="0.01" min="0" placeholder="e.g. 20.0" required>
+                        <small class="field-error" id="potassiumError"></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="temperatureInput">Temperature (deg C)</label>
+                        <input type="number" id="temperatureInput" step="0.01" placeholder="e.g. 25.0" required>
+                        <small class="field-error" id="temperatureError"></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="humidityInput">Humidity (%)</label>
+                        <input type="number" id="humidityInput" step="0.01" min="0" max="100" placeholder="e.g. 80.0" required>
+                        <small class="field-error" id="humidityError"></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="phInput">Soil pH</label>
+                        <input type="number" id="phInput" step="0.01" min="0" max="14" placeholder="e.g. 6.5" required>
+                        <small class="field-error" id="phError"></small>
+                    </div>
+                    <div class="input-group">
+                        <label for="rainfallInput">Rainfall (mm)</label>
+                        <input type="number" id="rainfallInput" step="0.01" min="0" placeholder="e.g. 200.0" required>
+                        <small class="field-error" id="rainfallError"></small>
+                    </div>
+                </div>
+                <div class="recommend-form-actions">
+                    <button type="submit" class="btn-primary" id="recommendSubmitBtn" disabled>
+                        <span class="btn-text">Generate Recommendation</span>
+                        <span class="btn-loader hidden"><i class="fas fa-spinner fa-spin"></i></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Price Prediction Modal -->
+    <div class="predict-modal hidden" id="predictModal" aria-hidden="true">
+        <div class="predict-modal-backdrop" id="predictModalBackdrop"></div>
+        <div class="predict-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="predictModalTitle">
+            <button class="predict-modal-close" id="predictModalClose" aria-label="Close price prediction form">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 id="predictModalTitle">Price Prediction Inputs</h3>
+            <p class="predict-modal-subtitle">Fill all required fields to forecast market price.</p>
+
+            <form id="predictForm" class="predict-form" novalidate>
+                <div class="predict-form-grid">
+                    <div class="input-group">
+                        <label for="stateInput">State</label>
+                        <div class="select-shell">
+                            <select id="stateInput" required>
+                                <option value="">Select state</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="lgaInput">LGA</label>
+                        <div class="select-shell">
+                            <select id="lgaInput" required disabled>
+                                <option value="">Select LGA</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="marketInput">Market</label>
+                        <div class="select-shell">
+                            <select id="marketInput" required disabled>
+                                <option value="">Select market</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="priceTypeInput">Price Type</label>
+                        <div class="select-shell">
+                            <select id="priceTypeInput" required>
+                                <option value="">Select price type</option>
+                                <option value="Wholesale">Wholesale</option>
+                                <option value="Retail">Retail</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="categoryInput">Category</label>
+                        <div class="select-shell">
+                            <select id="categoryInput" required>
+                                <option value="">Select category</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="commodityInput">Commodity</label>
+                        <div class="select-shell">
+                            <select id="commodityInput" required disabled>
+                                <option value="">Select commodity</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="unitInput">Unit</label>
+                        <div class="select-shell">
+                            <select id="unitInput" required disabled>
+                                <option value="">Select unit</option>
+                            </select>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="quantityInput">Quantity</label>
+                        <input type="number" id="quantityInput" min="0.1" step="0.01" placeholder="e.g. 100" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="dateInput">Date</label>
+                        <input type="date" id="dateInput" required>
+                    </div>
+                </div>
+                <div class="predict-form-actions">
+                    <button type="submit" class="btn-primary" id="predictSubmitBtn" disabled>
+                        <span class="btn-text">Predict Price</span>
+                        <span class="btn-loader hidden"><i class="fas fa-spinner fa-spin"></i></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

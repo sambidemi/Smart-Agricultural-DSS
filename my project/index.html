@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23238c5d' d='M54 10C34 11 20 21 14 37c-4 10 0 17 8 17 15 0 28-13 32-44zM16 49c4-3 9-7 14-12 5-5 10-12 14-20-14 5-24 14-28 24-1 3-1 6 0 8z'/%3E%3C/svg%3E">
+    <title>AgroSense | Intelligent Farming Decisions</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="preloader" aria-hidden="true">
+        <div class="loader"></div>
+    </div>
+
+    <header>
+        <nav class="navbar" id="navbar" aria-label="Primary">
+            <div class="nav-container">
+                <a class="nav-logo" href="#home" aria-label="AgroSense home">
+                    <span class="logo-icon"><i class="fas fa-leaf" aria-hidden="true"></i></span>
+                    <span class="logo-text">AgroSense</span>
+                </a>
+
+                <div class="nav-menu" id="navMenu">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="#home" class="nav-link active">Home</a></li>
+                        <li class="nav-item"><a href="#features" class="nav-link">Features</a></li>
+                        <li class="nav-item"><a href="#how-it-works" class="nav-link">How It Works</a></li>
+                        <li class="nav-item"><a href="#what-you-gain" class="nav-link">What You Gain</a></li>
+                        <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-buttons">
+                    <a href="#" class="btn btn-outline" id="loginBtn" data-auth-modal="login">Log in</a>
+                    <a href="#" class="btn btn-primary" id="getStartedBtn" data-auth-modal="signup">Get started <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
+
+                <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation" aria-controls="navMenu" aria-expanded="false">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-particles" id="particles" aria-hidden="true"></div>
+            <div class="container hero-container">
+                <div class="hero-content fade-in-left">
+                    <span class="hero-badge">⚡Powered by Advanced Machine Learning</span>
+                    <h1 class="hero-title">
+                        <span class="title-line">Smart Agricultural</span>
+                        <span class="title-gradient">Decision Support System</span>
+                    </h1>
+                    <p class="hero-description">
+                        Transform your farming with real-time crop recommendations, accurate price forecasts, and data-driven insights.
+                    </p>
+                    <div class="hero-cta">
+                        <a href="#" class="btn btn-primary btn-large" id="trySystemBtn" data-auth-modal="signup">Try the system <i class="fas fa-rocket" aria-hidden="true"></i></a>
+                        <a href="#features" class="btn btn-outline btn-large">Explore features <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+
+                <div class="hero-visual fade-in-right">
+                    <div class="hero-image-wrapper hero-image-card">
+                        <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+                             alt="Drone monitoring a smart farm"
+                             class="hero-main-image hero-image-card-image">
+                        <div class="hero-image-card-overlay"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-wave" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                    <path fill="#ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,170.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                </svg>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">POWERFUL FEATURES</span>
+                    <h2 class="section-title">Intelligent Tools for <span class="text-gradient">Modern Farming</span></h2>
+                    <p class="section-description">
+                        Leverage cutting-edge machine learning to make data backed decisions that increase your agricultural productivity and profitability.
+                    </p>
+                </div>
+
+                <div class="features-grid">
+                    <article class="feature-card" data-tilt>
+                        <div class="feature-icon-wrapper">
+                            <div class="feature-icon bg-primary">
+                                <i class="fas fa-seedling" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <h3 class="feature-title">Crop Recommendation Engine</h3>
+                        <p class="feature-text">
+                            Input soil, and environmental conditions. Our AI models analyzes these parameters to recommend the most suitable crops.
+                        </p>
+                        <div class="feature-hover-effect"></div>
+                    </article>
+
+                    <article class="feature-card" data-tilt>
+                        <div class="feature-icon-wrapper">
+                            <div class="feature-icon bg-success">
+                                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <h3 class="feature-title">Price forecasting</h3>
+                        <p class="feature-text">
+                            Enter market data and commodity information and get market price forecasts.
+                        </p>
+                        <div class="feature-hover-effect"></div>
+                    </article>
+
+                    <article class="feature-card" data-tilt>
+                        <div class="feature-icon-wrapper">
+                            <div class="feature-icon bg-warning">
+                                <i class="fas fa-flask" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <h3 class="feature-title">Historical Trend Analysis</h3>
+                        <p class="feature-text">
+                            Visualize price trends of agricutlural commodities over time.
+                        </p>
+                        <div class="feature-hover-effect"></div>
+                    </article>
+
+                    <article class="feature-card" data-tilt>
+                        <div class="feature-icon-wrapper">
+                            <div class="feature-icon bg-info">
+                                <i class="fas fa-robot" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <h3 class="feature-title">Recommendation History</h3>
+                        <p class="feature-text">
+                            Access all your previous crop recommendations and price predictions. Track your decision History and learn from past insights.
+                        </p>
+                        <div class="feature-hover-effect"></div>
+                    </article>
+                    
+                    <article class="feature-card" data-tilt>
+                        <div class="feature-icon-wrapper">
+                            <div class="feature-icon bg-purple">
+                                <i class="fas fa-user-edit" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <h3 class="feature-title">Farm Profile Management</h3>
+                        <p class="feature-text">
+                            Store and update farm details (type, size, soil, water source) for tailored recommendations.
+                        </p>
+                        <div class="feature-hover-effect"></div>
+                    </article>
+                    
+                    <article class="feature-card" data-tilt>
+                        <div class="feature-icon-wrapper">
+                            <div class="feature-icon bg-rose">
+                                <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <h3 class="feature-title">Agro-Environmental Zone Prediction</h3>
+                        <p class="feature-text">
+                            Automatic classification of agricultural zones based on environmental parameters.
+                        </p>
+                        <div class="feature-hover-effect"></div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="how-it-works">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">SIMPLE PROCESS</span>
+                    <h2 class="section-title">From Data to <span class="text-gradient">Profitable Decisions</span></h2>
+                    <p class="section-description">
+                        The system transforms complex data into actionable insights in just four simple steps.
+                    </p>
+                </div>
+
+                <div class="steps-container steps-container-inline">
+                    <article class="step-item step-item-inline">
+                        <div class="step-number">01</div>
+                        <div class="step-content step-content-grow">
+                            <div class="step-icon">
+                                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                            </div>
+                            <h3>Input your data</h3>
+                            <p>Enter soil, environmental, market and commodity information.</p>
+                            <div class="step-image">
+                                <img src="https://media.istockphoto.com/id/1407520818/photo/happy-young-farmer-using-digital-tablet-while-working-on-organic-sustainable-farm-to.webp?a=1&b=1&s=612x612&w=0&k=20&c=CEkFbKSdDHTJ7vsKVRggIgItzJQ6mu49nwjCIjZF7DY=" alt="Farmer using a tablet in the field">
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step-item step-item-inline">
+                        <div class="step-number">02</div>
+                        <div class="step-content step-content-grow">
+                            <div class="step-icon">
+                                <i class="fas fa-robot" aria-hidden="true"></i>
+                            </div>
+                            <h3>ML Analysis</h3>
+                            <p>ML models process your data against historical patterns.</p>
+                            <div class="step-image">
+                                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Data dashboard on a laptop">
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step-item step-item-inline">
+                        <div class="step-number">03</div>
+                        <div class="step-content step-content-grow">
+                            <div class="step-icon">
+                                <i class="fas fa-chart-simple" aria-hidden="true"></i>
+                            </div>
+                            <h3>Get Predictions</h3>
+                            <p>Receive crop recommendations and future market price of commodities.</p>
+                            <div class="step-image">
+                                <img src="https://images.unsplash.com/photo-1659710718982-f668746f4f13?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGZhcm0lMjBjcm9wc3xlbnwwfHwwfHx8MA%3D%3D" alt="Smartphone showing crop insight">
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="step-item step-item-inline">
+                        <div class="step-number">04</div>
+                        <div class="step-content step-content-grow">
+                            <div class="step-icon">
+                                <i class="fas fa-hand-holding-heart" aria-hidden="true"></i>
+                            </div>
+                            <h3>Make Informed Decisions</h3>
+                            <p>Plant the right crops at the right time and sell when market condition are most favorable.</p>
+                            <div class="step-image">
+                                <img src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Happy farmer holding a tablet">
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="what-you-gain" class="what-you-gain" aria-labelledby="gain-title">
+            <div class="container">
+                <div class="gain-header fade-in-up">
+                    <span class="section-subtitle">WHAT YOU GAIN</span>
+                    <h2 class="section-title" id="gain-title">Get More from <span class="text-gradient">Your Land</span></h2>
+                    <p class="section-description">Get more from your land with data you can trust. Here's what our system helps you achieve:</p>
+                </div>
+
+                <div class="gain-carousel fade-in-up" aria-label="What you gain carousel">
+                    <button class="gain-nav gain-prev" id="gainPrevBtn" type="button" aria-label="Show previous benefit">
+                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+
+                    <div class="gain-viewport">
+                        <div class="gain-track" id="gainTrack">
+                            <article class="gain-card">
+                                <div class="gain-icon bg-success"><i class="fas fa-chart-line" aria-hidden="true"></i></div>
+                                <h3>Higher Profit Per Acre</h3>
+                                <p>Stop guessing which crop to plant. Get recommendations based on your soil, climate, and current market demand.</p>
+                            </article>
+
+                            <article class="gain-card">
+                                <div class="gain-icon bg-warning"><i class="fas fa-calendar-alt" aria-hidden="true"></i></div>
+                                <h3>Sell at the Right Time</h3>
+                                <p>Price forecasts help you decide whether to sell now or wait. Avoid price dips and time your harvest for better returns.</p>
+                            </article>
+
+                            <article class="gain-card">
+                                <div class="gain-icon bg-info"><i class="fas fa-shield-alt" aria-hidden="true"></i></div>
+                                <h3>Lower Risk of Loss</h3>
+                                <p>See oversupply risks before planting. Avoid crops heading into a market glut and protect your investment.</p>
+                            </article>
+
+                            <article class="gain-card">
+                                <div class="gain-icon bg-purple"><i class="fas fa-tachometer-alt" aria-hidden="true"></i></div>
+                                <h3>Less Guesswork</h3>
+                                <p>Stop calling multiple traders or tracking prices manually. See forecasts in one clear dashboard.</p>
+                            </article>
+
+                            <article class="gain-card">
+                                <div class="gain-icon bg-rose"><i class="fas fa-circle-check" aria-hidden="true"></i></div>
+                                <h3>Confidence in Decisions</h3>
+                                <p>Decisions backed by data, not intuition alone. Consistent, transparent inputs for every choice.</p>
+                            </article>
+                        </div>
+                    </div>
+
+                    <button class="gain-nav gain-next" id="gainNextBtn" type="button" aria-label="Show next benefit">
+                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="gain-dots" id="gainDots" aria-label="Carousel slide indicators">
+                    <button class="gain-dot active" type="button" data-index="0" aria-label="Go to first benefit"></button>
+                    <button class="gain-dot" type="button" data-index="1" aria-label="Go to second benefit"></button>
+                    <button class="gain-dot" type="button" data-index="2" aria-label="Go to third benefit"></button>
+                    <button class="gain-dot" type="button" data-index="3" aria-label="Go to fourth benefit"></button>
+                    <button class="gain-dot" type="button" data-index="4" aria-label="Go to fifth benefit"></button>
+                </div>
+            </div>
+        </section>
+
+        <section id="get-started" class="cta-section" aria-labelledby="cta-title">
+            <div class="container">
+                <div class="cta-wrapper">
+                    <div class="cta-content">
+                        <h2 class="cta-title" id="cta-title">Ready to transform your farming?</h2>
+                        <p class="cta-description">Join thousands of farmers using AI to make smarter decision.</p>
+                        <div class="cta-buttons">
+                            <a href="#" class="btn btn-primary btn-large" id="finalCtaBtn" data-auth-modal="signup">Get Started <i class="fas fa-rocket" aria-hidden="true"></i></a>
+                            <a href="#contact" class="btn btn-outline-light btn-large">Contact</a>
+                        </div>
+                    </div>
+                    <div class="cta-image">
+                        <img src="https://media.istockphoto.com/id/1325198319/photo/african-farmer-using-tablet-for-research-a-papaya-in-organic-farm-agriculture-or-cultivation.jpg?s=612x612&w=0&k=20&c=yEV5-8wP-Ywa5Xxvrxf7pWl13iFUTJBBN71pHYIP-m0=" alt="Happy farmer with a tablet">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <section class="footer-about" aria-labelledby="about">
+                    <h2 class="footer-logo" id="about">
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
+                        <span>AgroSense</span>
+                    </h2>
+                    <p class="footer-description">Data-driven farming for a resilient future.</p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                        <a href="https://www.x.com" aria-label="X">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" focusable="false">
+                                <path d="M18.901 1.153h3.68l-8.041 9.19L24 22.847h-7.406l-5.8-7.584-6.639 7.584H.474l8.6-9.83L0 1.153h7.594l5.243 6.932 6.064-6.932Zm-1.291 19.494h2.039L6.486 3.238H4.298L17.61 20.647Z"></path>
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                        <a href="https://www.linkedin.com" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+                    </div>
+                </section>
+
+                <nav class="footer-links" aria-label="Explore">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How it works</a></li>
+                        <li><a href="#what-you-gain">What You Gain</a></li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-links" aria-label="Information">
+                    <h4>Information</h4>
+                    <ul>
+                        <li><a href="#about">About us</a></li>
+                        <li><a href="#privacy">Privacy</a></li>
+                        <li><a href="#terms">Terms</a></li>
+                    </ul>
+                </nav>
+
+                <section class="footer-contact" aria-labelledby="contact-heading">
+                    <h4 id="contact-heading">Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Kwara, Nigeria</li>
+                        <li><i class="fas fa-phone-alt" aria-hidden="true"></i> +234 (813) 705-1346</li>
+                        <li><i class="fas fa-envelope" aria-hidden="true"></i> hello@agrisense.ag</li>
+                        <li><i class="fas fa-clock" aria-hidden="true"></i> Mon-Fri: 8am - 6pm</li>
+                    </ul>
+                    <span id="privacy" class="anchor-target" aria-hidden="true"></span>
+                    <span id="terms" class="anchor-target" aria-hidden="true"></span>
+                </section>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 AgroSense - smart agricultural decision support platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="auth-modal" id="loginModal" aria-hidden="true">
+        <div class="auth-modal-backdrop" data-auth-close></div>
+        <section class="auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+            <button class="auth-modal-close" type="button" aria-label="Close sign in form" data-auth-close>
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+
+            <div class="auth-modal-grid auth-modal-grid-single">
+                <div class="auth-modal-panel auth-modal-panel-single">
+                    <div class="auth-modal-form-wrap">
+                        <div class="auth-modal-brand auth-modal-brand-centered">
+                            <i class="fas fa-leaf" aria-hidden="true"></i>
+                            <span>AgroSense</span>
+                        </div>
+                        <div class="auth-modal-header">
+                            <h2 id="loginModalTitle">Sign in</h2>
+                            <p>Access your AgroSense workspace.</p>
+                        </div>
+
+                        <form id="loginForm" class="auth-inline-form" novalidate>
+                            <div class="auth-field">
+                                <label for="email">Email address</label>
+                                <div class="auth-input-shell">
+                                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                                    <input type="email" id="email" name="email" placeholder="hello@agrisense.ag" autocomplete="email">
+                                </div>
+                                <div class="error-message" id="emailError"></div>
+                            </div>
+
+                            <div class="auth-field">
+                                <label for="password">Password</label>
+                                <div class="auth-input-shell">
+                                    <i class="fas fa-lock" aria-hidden="true"></i>
+                                    <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password">
+                                    <button type="button" class="toggle-password auth-toggle-password" aria-label="Show password">
+                                        <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="error-message" id="passwordError"></div>
+                            </div>
+
+                            <div class="auth-modal-options">
+                                <label class="auth-check">
+                                    <input type="checkbox" name="remember" id="remember">
+                                    <span>Remember me</span>
+                                </label>
+                                <a href="#" class="auth-text-link" id="forgotPasswordLink">Forgot password?</a>
+                            </div>
+
+                            <button type="submit" class="auth-submit-btn" id="loginBtnSubmit">
+                                <span class="btn-text">Sign in</span>
+                                <span class="btn-loader hidden"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i></span>
+                            </button>
+                        </form>
+
+                        <div class="auth-modal-footer">
+                            <p>Don't have an account? <a href="#" id="signupLink" data-auth-switch="signup">Create account</a></p>
+                        </div>
+
+                        <div class="auth-modal-divider">
+                            <span>Or continue with</span>
+                        </div>
+
+                        <div class="auth-social-row">
+                            <button class="auth-social-btn" id="googleAuth" type="button">
+                                <i class="fab fa-google" aria-hidden="true"></i>
+                                <span>Google</span>
+                            </button>
+                            <button class="auth-social-btn" id="appleAuth" type="button">
+                                <i class="fab fa-apple" aria-hidden="true"></i>
+                                <span>Apple</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="auth-modal" id="signupModal" aria-hidden="true">
+        <div class="auth-modal-backdrop" data-auth-close></div>
+        <section class="auth-modal-dialog auth-modal-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="signupModalTitle">
+            <button class="auth-modal-close auth-modal-close-dark" type="button" aria-label="Close create account form" data-auth-close>
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+
+            <div class="auth-modal-grid auth-modal-grid-single">
+                <div class="auth-modal-panel auth-modal-panel-signup">
+                    <div class="auth-modal-form-wrap auth-modal-form-wrap-wide">
+                        <div class="auth-modal-brand auth-modal-brand-centered">
+                            <i class="fas fa-leaf" aria-hidden="true"></i>
+                            <span>AgroSense</span>
+                        </div>
+                        <div class="auth-modal-header auth-modal-header-tight">
+                            <div class="auth-step-pill" id="signupStepPill">Step 1 of 2</div>
+                            <h2 id="signupModalTitle">Create account</h2>
+                            <p>Set up your AgroSense account in two quick steps.</p>
+                        </div>
+
+                        <div class="auth-step-progress" aria-hidden="true">
+                            <span class="auth-step-progress-bar is-active" id="signupProgressOne"></span>
+                            <span class="auth-step-progress-bar" id="signupProgressTwo"></span>
+                        </div>
+
+                        <form id="signupForm" class="auth-inline-form auth-inline-form-signup" novalidate>
+                            <div class="auth-signup-step is-active" id="signupStepOne">
+                                <div class="auth-form-grid-two">
+                                    <div class="auth-field">
+                                        <label for="fullname">Full name</label>
+                                        <div class="auth-input-shell">
+                                            <i class="fas fa-user" aria-hidden="true"></i>
+                                            <input type="text" id="fullname" name="fullname" placeholder="John O. Farmer" autocomplete="name">
+                                        </div>
+                                        <div class="error-message" id="fullnameError"></div>
+                                    </div>
+
+                                    <div class="auth-field">
+                                        <label for="signup-email">Email address</label>
+                                        <div class="auth-input-shell">
+                                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                                            <input type="email" id="signup-email" name="email" placeholder="hello@agrisense.ag" autocomplete="email">
+                                        </div>
+                                        <div class="error-message" id="signupEmailError"></div>
+                                    </div>
+
+                                    <div class="auth-field auth-field-password">
+                                        <label for="signup-password">Password</label>
+                                        <div class="auth-input-shell">
+                                            <i class="fas fa-lock" aria-hidden="true"></i>
+                                            <input type="password" id="signup-password" name="password" placeholder="Strong password" autocomplete="new-password">
+                                            <button type="button" class="toggle-password auth-toggle-password" data-target="signup-password" aria-label="Show password">
+                                                <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        <div class="password-strength auth-password-strength" id="passwordStrength">
+                                            <div class="strength-bar"></div>
+                                            <div class="strength-text">Password strength</div>
+                                        </div>
+                                        <div class="error-message" id="signupPasswordError"></div>
+                                    </div>
+
+                                    <div class="auth-field auth-field-password-confirm">
+                                        <label for="confirm-password">Confirm password</label>
+                                        <div class="auth-input-shell">
+                                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                            <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm password" autocomplete="new-password">
+                                            <button type="button" class="toggle-password auth-toggle-password" data-target="confirm-password" aria-label="Show password">
+                                                <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        <div class="auth-password-spacer" aria-hidden="true"></div>
+                                        <div class="error-message" id="confirmPasswordError"></div>
+                                    </div>
+                                </div>
+
+                                <div class="auth-step-actions auth-step-actions-end">
+                                    <button type="button" class="auth-submit-btn auth-submit-btn-secondary" id="signupNextBtn">Continue</button>
+                                </div>
+                            </div>
+
+                            <div class="auth-signup-step" id="signupStepTwo">
+                                <div class="auth-form-grid-two">
+                                    <div class="auth-field">
+                                        <label for="location">Location</label>
+                                        <div class="auth-input-shell">
+                                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                            <input type="text" id="location" name="location" placeholder="City, Region" autocomplete="address-level2">
+                                        </div>
+                                        <div class="error-message" id="locationError"></div>
+                                    </div>
+
+                                    <div class="auth-field">
+                                        <label for="farmType">Farm type</label>
+                                        <div class="auth-input-shell auth-select-shell">
+                                            <i class="fas fa-tractor" aria-hidden="true"></i>
+                                            <select id="farmType" name="farmType">
+                                                <option value="" selected>Select farm type</option>
+                                                <option value="Crop Farming">Crop Farming</option>
+                                                <option value="Livestock">Livestock</option>
+                                                <option value="Mixed Farming">Mixed Farming</option>
+                                                <option value="Orchard">Orchard</option>
+                                                <option value="Greenhouse">Greenhouse</option>
+                                            </select>
+                                        </div>
+                                        <div class="error-message" id="farmTypeError"></div>
+                                    </div>
+
+                                    <div class="auth-field">
+                                        <label for="farmSize">Farm size (hectares)</label>
+                                        <div class="auth-input-shell">
+                                            <i class="fas fa-ruler-combined" aria-hidden="true"></i>
+                                            <input type="number" id="farmSize" name="farmSize" placeholder="e.g. 5.5" step="0.1">
+                                        </div>
+                                        <div class="error-message" id="farmSizeError"></div>
+                                    </div>
+
+                                    <div class="auth-field">
+                                        <label for="soilType">Soil type</label>
+                                        <div class="auth-input-shell auth-select-shell">
+                                            <i class="fas fa-globe" aria-hidden="true"></i>
+                                            <select id="soilType" name="soilType">
+                                                <option value="" selected>Select soil type</option>
+                                                <option value="Clay">Clay</option>
+                                                <option value="Sandy">Sandy</option>
+                                                <option value="Silt">Silt</option>
+                                                <option value="Loam">Loam</option>
+                                                <option value="Chalky">Chalky</option>
+                                                <option value="Peaty">Peaty</option>
+                                            </select>
+                                        </div>
+                                        <div class="error-message" id="soilTypeError"></div>
+                                    </div>
+
+                                    <div class="auth-field">
+                                        <label for="waterSource">Water source</label>
+                                        <div class="auth-input-shell auth-select-shell">
+                                            <i class="fas fa-droplet" aria-hidden="true"></i>
+                                            <select id="waterSource" name="waterSource">
+                                                <option value="" selected>Select water source</option>
+                                                <option value="Rain-fed">Rain-fed</option>
+                                                <option value="Irrigation">Irrigation</option>
+                                                <option value="River">River</option>
+                                                <option value="Borehole">Borehole</option>
+                                                <option value="Mixed">Mixed</option>
+                                            </select>
+                                        </div>
+                                        <div class="error-message" id="waterSourceError"></div>
+                                    </div>
+                                </div>
+
+                                <div class="auth-modal-options auth-modal-options-stack">
+                                    <label class="auth-check">
+                                        <input type="checkbox" name="terms" id="termsCheckbox">
+                                        <span>I agree to the <a href="#" class="auth-text-link-inline" id="termsLink">Terms of Service</a> and <a href="#" class="auth-text-link-inline" id="privacyLink">Privacy Policy</a></span>
+                                    </label>
+                                </div>
+                                <div class="error-message" id="termsError"></div>
+
+                                <div class="auth-step-actions">
+                                    <button type="button" class="auth-submit-btn auth-submit-btn-secondary" id="signupBackBtn">Back</button>
+                                    <button type="submit" class="auth-submit-btn" id="signupBtnSubmit">
+                                        <span class="btn-text">Create account</span>
+                                        <span class="btn-loader hidden"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="auth-modal-footer">
+                            <p>Already have an account? <a href="#" id="loginLink" data-auth-switch="login">Sign in</a></p>
+                        </div>
+
+                        <div class="auth-modal-divider">
+                            <span>Or continue with</span>
+                        </div>
+
+                        <div class="auth-social-row">
+                            <button class="auth-social-btn" id="googleSignup" type="button">
+                                <i class="fab fa-google" aria-hidden="true"></i>
+                                <span>Google</span>
+                            </button>
+                            <button class="auth-social-btn" id="appleSignup" type="button">
+                                <i class="fab fa-apple" aria-hidden="true"></i>
+                                <span>Apple</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <a href="#home" class="back-to-top" id="backToTop" aria-label="Back to top">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </a>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

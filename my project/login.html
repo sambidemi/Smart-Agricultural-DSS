@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>AgroSense | Sign In to Smart Farming</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23238c5d' d='M54 10C34 11 20 21 14 37c-4 10 0 17 8 17 15 0 28-13 32-44zM16 49c4-3 9-7 14-12 5-5 10-12 14-20-14 5-24 14-28 24-1 3-1 6 0 8z'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="modal-open">
+    <div class="auth-modal is-open" id="loginModal" aria-hidden="false">
+        <div class="auth-modal-backdrop"></div>
+        <section class="auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+            <a href="index.html" class="auth-modal-close" aria-label="Back to home">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </a>
+
+            <div class="auth-modal-grid auth-modal-grid-single">
+                <div class="auth-modal-panel auth-modal-panel-single">
+                    <div class="auth-modal-form-wrap">
+                        <div class="auth-modal-brand auth-modal-brand-centered">
+                            <i class="fas fa-leaf" aria-hidden="true"></i>
+                            <span>AgroSense</span>
+                        </div>
+                        <div class="auth-modal-header">
+                            <h2 id="loginModalTitle">Sign in</h2>
+                            <p>Access your AgroSense workspace.</p>
+                        </div>
+
+                        <form id="loginForm" class="auth-inline-form" novalidate>
+                            <div class="auth-field">
+                                <label for="email">Email address</label>
+                                <div class="auth-input-shell">
+                                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                                    <input type="email" id="email" name="email" placeholder="hello@agrisense.ag" autocomplete="email">
+                                </div>
+                                <div class="error-message" id="emailError"></div>
+                            </div>
+
+                            <div class="auth-field">
+                                <label for="password">Password</label>
+                                <div class="auth-input-shell">
+                                    <i class="fas fa-lock" aria-hidden="true"></i>
+                                    <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password">
+                                    <button type="button" class="toggle-password auth-toggle-password" aria-label="Show password">
+                                        <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="error-message" id="passwordError"></div>
+                            </div>
+
+                            <div class="auth-modal-options">
+                                <label class="auth-check">
+                                    <input type="checkbox" name="remember" id="remember">
+                                    <span>Remember me</span>
+                                </label>
+                                <a href="#" class="auth-text-link" id="forgotPasswordLink">Forgot password?</a>
+                            </div>
+
+                            <button type="submit" class="auth-submit-btn" id="loginBtnSubmit">
+                                <span class="btn-text">Sign in</span>
+                                <span class="btn-loader hidden"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i></span>
+                            </button>
+                        </form>
+
+                        <div class="auth-modal-footer">
+                            <p>Don't have an account? <a href="index.html?auth=signup" id="signupLink">Create account</a></p>
+                        </div>
+
+                        <div class="auth-modal-divider">
+                            <span>Or continue with</span>
+                        </div>
+
+                        <div class="auth-social-row">
+                            <button class="auth-social-btn" id="googleAuth" type="button">
+                                <i class="fab fa-google" aria-hidden="true"></i>
+                                <span>Google</span>
+                            </button>
+                            <button class="auth-social-btn" id="appleAuth" type="button">
+                                <i class="fab fa-apple" aria-hidden="true"></i>
+                                <span>Apple</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="auth.js"></script>
+</body>
+</html>
