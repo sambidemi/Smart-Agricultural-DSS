@@ -120,8 +120,8 @@ class AuthManager {
         }
 
         // Social auth handlers
-        document.getElementById('googleAuth')?.addEventListener('click', () => this.handleSocialAuth('Google'));
-        document.getElementById('appleAuth')?.addEventListener('click', () => this.handleSocialAuth('Apple'));
+        document.getElementById('googleAuth')?.addEventListener('click', () => this.handleSocialAuth('google'));
+        document.getElementById('appleAuth')?.addEventListener('click', () => this.handleSocialAuth('apple'));
     }
 
     static initSignup() {
@@ -148,8 +148,8 @@ class AuthManager {
         }
 
         // Social auth handlers
-        document.getElementById('googleSignup')?.addEventListener('click', () => this.handleSocialAuth('Google'));
-        document.getElementById('appleSignup')?.addEventListener('click', () => this.handleSocialAuth('Apple'));
+        document.getElementById('googleSignup')?.addEventListener('click', () => this.handleSocialAuth('google'));
+        document.getElementById('appleSignup')?.addEventListener('click', () => this.handleSocialAuth('apple'));
 
         // Terms links
         document.getElementById('termsLink')?.addEventListener('click', (e) => {
@@ -531,10 +531,10 @@ class AuthManager {
     }
 
     static handleSocialAuth(provider) {
-        this.showToast(`Connecting with ${provider}...`, 'info');
-        setTimeout(() => {
-            this.showToast(`Successfully connected with ${provider}`, 'success');
-        }, 1000);
+        const providerLabel = String(provider || 'Social')
+            .toLowerCase()
+            .replace(/^\w/, (char) => char.toUpperCase());
+        this.showToast(`${providerLabel} sign-in is coming soon`, 'info');
     }
 }
 
