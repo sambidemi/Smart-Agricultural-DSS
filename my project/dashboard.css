@@ -563,12 +563,14 @@ body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.15rem;
+    min-width: 0;
 }
 
 .info-column {
     display: flex;
     flex-direction: column;
     gap: 1.15rem;
+    min-width: 0;
 }
 
 .info-item {
@@ -581,6 +583,7 @@ body {
     border-radius: 1.05rem;
     box-shadow: 0 16px 24px rgba(15, 37, 27, 0.09);
     transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+    min-width: 0;
 }
 
 .info-item:hover {
@@ -619,6 +622,9 @@ body {
     color: var(--dark-800);
     line-height: 1.35;
     padding-left: 2.2rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .onboarding-section {
@@ -836,6 +842,7 @@ body {
     border: 1px solid rgba(18, 61, 43, 0.1);
     border-radius: 1.1rem;
     padding: 1rem;
+    min-width: 0;
 }
 
 .profile-form {
@@ -848,12 +855,14 @@ body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
+    min-width: 0;
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 0;
 }
 
 .input-group label {
@@ -864,6 +873,8 @@ body {
 
 .input-group input,
 .input-group select {
+    width: 100%;
+    min-width: 0;
     padding: 0.92rem 1rem;
     border: 1px solid rgba(18, 61, 43, 0.12);
     border-radius: 1rem;
@@ -1426,6 +1437,15 @@ body {
 @media (max-width: 1180px) {
     .profile-card {
         grid-template-columns: 220px 1fr;
+    }
+
+    .profile-settings-layout,
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    #editEmail {
+        font-size: 0.92rem;
     }
 }
 

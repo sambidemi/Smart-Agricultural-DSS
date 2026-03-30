@@ -618,6 +618,7 @@ class DashboardManager {
     openPredictionModal() {
         if (!this.predictModal) return;
         this.resetPredictionForm();
+        this.allowFuturePredictionDates();
         this.seedPredictionFormOptions();
         this.predictModal.classList.remove('hidden');
         this.predictModal.setAttribute('aria-hidden', 'false');
@@ -645,10 +646,16 @@ class DashboardManager {
     resetPredictionForm() {
         if (!this.predictForm) return;
         this.predictForm.reset();
+        this.allowFuturePredictionDates();
         this.resetSelect(this.predictFields.LGA, 'Select LGA');
         this.resetSelect(this.predictFields.market, 'Select market');
         this.resetSelect(this.predictFields.commodity, 'Select commodity');
         this.resetSelect(this.predictFields.unit, 'Select unit');
+    }
+
+    allowFuturePredictionDates() {
+        if (!this.predictFields.date) return;
+        this.predictFields.date.removeAttribute('max');
     }
 
     populateSelect(selectEl, options, placeholder) {
