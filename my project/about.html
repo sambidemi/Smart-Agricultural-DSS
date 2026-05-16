@@ -1,0 +1,433 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23238c5d' d='M54 10C34 11 20 21 14 37c-4 10 0 17 8 17 15 0 28-13 32-44zM16 49c4-3 9-7 14-12 5-5 10-12 14-20-14 5-24 14-28 24-1 3-1 6 0 8z'/%3E%3C/svg%3E">
+    <title>About Us | AgroSense</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="about.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Preloader -->
+    <div class="preloader" aria-hidden="true">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Navigation -->
+    <header>
+        <nav class="navbar" id="navbar" aria-label="Primary">
+            <div class="nav-container">
+                <a class="nav-logo" href="index.html" aria-label="AgroSense home">
+                    <span class="logo-icon"><i class="fas fa-leaf" aria-hidden="true"></i></span>
+                    <span class="logo-text">AgroSense</span>
+                </a>
+
+                <div class="nav-menu" id="navMenu">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html#home" class="nav-link">Home</a></li>
+                        <li class="nav-item"><a href="index.html#features" class="nav-link">Features</a></li>
+                        <li class="nav-item"><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+                        <li class="nav-item"><a href="index.html#what-you-gain" class="nav-link">What You Gain</a></li>
+                        <li class="nav-item"><a href="about.html" class="nav-link active">About</a></li>
+                        <li class="nav-item"><a href="index.html#contact" class="nav-link">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-buttons">
+                    <a href="index.html?auth=login" class="btn btn-outline">Log in</a>
+                    <a href="index.html?auth=signup" class="btn btn-primary">Get started <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
+
+                <button class="hamburger" id="hamburger" type="button" aria-label="Toggle navigation" aria-controls="navMenu" aria-expanded="false">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+        <main>
+
+        <!-- ===========================
+             HERO SECTION
+        =========================== -->
+        <section class="about-hero" id="about-home">
+            <div class="about-hero-particles" id="aboutParticles" aria-hidden="true"></div>
+            <div class="container about-hero-container">
+                <div class="about-hero-content fade-in-left">
+                    <span class="section-subtitle">ABOUT AGROSENSE</span>
+                    <h1 class="about-hero-title">
+                        <span class="title-line">Intelligent Agriculture</span>
+                        <span class="title-gradient">for Confident Farm Decisions</span>
+                    </h1>
+                    <p class="about-hero-description">
+                        AgroSense empowers farmers with predictive crop guidance, reliable market intelligence, and a simpler way to turn data into better harvest outcomes.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===========================
+             PLATFORM OVERVIEW
+        =========================== -->
+        <section id="platform" class="about-platform">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">PLATFORM OVERVIEW</span>
+                    <h2 class="section-title">A smarter way to <span class="text-gradient">plan, plant, and sell crops.</span></h2>
+                    <p class="section-description">
+                        AgroSense brings together agricultural science, market intelligence, and machine learning so farmers and agri-businesses can make decisions with confidence.
+                    </p>
+                </div>
+                <div class="about-platform-grid">
+                    <div class="about-platform-copy fade-in-left">
+                        <p>
+                            In today's agricultural landscape, the biggest challenge is not effort, it is uncertainty. AgroSense reduces that uncertainty by delivering clear recommendations for crop choice, market timing, and pricing strategy.
+                        </p>
+                        <p>
+                            The platform is built around three core capabilities: crop recommendation, price prediction, and market price analysis. Together, they help farmers move from reactive farming to proactive planning.
+                        </p>
+                        <ul class="about-platform-list">
+                            <li>Connect local farm conditions with actionable, data-driven recommendations.</li>
+                            <li>Forecast commodity prices using historical and current market patterns.</li>
+                            <li>Understand pricing cycles so you can choose when to sell with confidence.</li>
+                        </ul>
+                    </div>
+                    <aside class="about-platform-tile fade-in-right">
+                        <div class="platform-step">
+                            <span class="platform-step-number">01</span>
+                            <div>
+                                <h3>Field-Level Insight</h3>
+                                <p>We translate soil and weather data into crop-match scores that are easy to understand.</p>
+                            </div>
+                        </div>
+                        <div class="platform-step">
+                            <span class="platform-step-number">02</span>
+                            <div>
+                                <h3>Market Visibility</h3>
+                                <p>See how prices have moved across time and why certain crops are gaining or losing value.</p>
+                            </div>
+                        </div>
+                        <div class="platform-step">
+                            <span class="platform-step-number">03</span>
+                            <div>
+                                <h3>Clear Recommendations</h3>
+                                <p>Get practical next steps, not just analytics ï¿½ from what to plant to when to sell.</p>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===========================
+             VISION & MISSION
+        =========================== -->
+        <section id="vision" class="about-vision">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">VISION & MISSION</span>
+                    <h2 class="section-title">Our purpose is to make better <span class="text-gradient">farm decisions standard practice. </span></h2>
+                    <p class="section-description">
+                        We deliver intelligent tools that are simple to use, respect local farming realities, and prioritize trust in every recommendation.
+                    </p>
+                </div>
+                <div class="about-vision-grid">
+                    <article class="vision-card fade-in-up">
+                        <div class="vision-icon bg-primary"><i class="fas fa-eye"></i></div>
+                        <h3>Our Vision</h3>
+                        <p>To create a world where every farmer has access to accurate agricultural foresight that improves both yields and income.</p>
+                    </article>
+                    <article class="vision-card fade-in-up" style="animation-delay:0.1s">
+                        <div class="vision-icon bg-success"><i class="fas fa-bullseye"></i></div>
+                        <h3>Our Mission</h3>
+                        <p>To make crop recommendation, price forecasting, and market analysis usable and trustworthy for farmers and agribusinesses everywhere.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===========================
+             THE PROBLEM WE SOLVE
+        =========================== -->
+        <section id="problems" class="about-solutions">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">THE PROBLEM WE SOLVE</span>
+                    <h2 class="section-title">Agriculture needs a faster path from <span class="text-gradient">information to action.</span></h2>
+                    <p class="section-description">
+                        Farmers face unpredictable weather, noisy market signals, and limited access to reliable advice. AgroSense fills the gap by making smart agriculture accessible, practical, and results-focused.
+                    </p>
+                </div>
+                <div class="about-solutions-grid">
+                    <article class="solution-card fade-in-up">
+                        <div class="solution-icon"><i class="fas fa-cloud-showers-heavy"></i></div>
+                        <h3>Unreliable Environmental Signals</h3>
+                        <p>Weather and soil conditions change quickly, making it hard to choose the right crop at the right time.</p>
+                    </article>
+                    <article class="solution-card fade-in-up" style="animation-delay:0.08s">
+                        <div class="solution-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h3>Volatile Market Prices</h3>
+                        <p>Farmers often sell at low prices because they lack visibility into seasonal and demand-driven price trends.</p>
+                    </article>
+                    <article class="solution-card fade-in-up" style="animation-delay:0.16s">
+                        <div class="solution-icon"><i class="fas fa-scroll-old"></i></div>
+                        <h3>Too Much Guesswork</h3>
+                        <p>Traditional decision-making relies on memories and intuition instead of systematic, data-backed reasoning.</p>
+                    </article>
+                    <article class="solution-card fade-in-up" style="animation-delay:0.24s">
+                        <div class="solution-icon"><i class="fas fa-user-friends"></i></div>
+                        <h3>Unequal Access to Expertise</h3>
+                        <p>Many farmers lack access to extension services or analytics, so they miss opportunities to maximize both yield and revenue.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===========================
+             MACHINE LEARNING ENGINES
+        =========================== -->
+        <section id="benefits" class="about-benefits">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">MACHINE LEARNING ENGINES</span>
+                    <h2 class="section-title">Models powering <span class="text-gradient">AgroSense predictions.</span></h2>
+                    <p class="section-description">
+                        AgroSense uses dedicated machine learning engines for crop recommendation, price forecasting, and agro-zone classification.
+                    </p>
+                </div>
+                <div class="about-benefits-grid">
+                    <article class="about-benefit-card fade-in-up">
+                        <div class="about-benefit-icon"><i class="fas fa-brain"></i></div>
+                        <div class="about-benefit-content">
+                            <h3>Random Forest Classifier</h3>
+                            <p>Used for crop recommendation by evaluating soil nutrients, pH, rainfall, humidity, and temperature patterns.</p>
+                        </div>
+                    </article>
+                    <article class="about-benefit-card fade-in-up" style="animation-delay:0.1s">
+                        <div class="about-benefit-icon" style="background: linear-gradient(135deg, #f39c12, #f1c40f);"><i class="fas fa-chart-line"></i></div>
+                        <div class="about-benefit-content">
+                            <h3>Random Forest Regressor</h3>
+                            <p>Used for commodity price prediction by learning from historical market, crop, location, and time-based data.</p>
+                        </div>
+                    </article>
+                    <article class="about-benefit-card fade-in-up" style="animation-delay:0.2s">
+                        <div class="about-benefit-icon" style="background: linear-gradient(135deg, #3498db, #5dade2);"><i class="fas fa-map-marked-alt"></i></div>
+                        <div class="about-benefit-content">
+                            <h3>Logistic Regression</h3>
+                            <p>Used for agro-zone classification by mapping environmental and farm inputs to suitable agricultural zones.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+        <!-- ===========================
+             FAQ SECTION
+        =========================== -->
+        <section id="faq" class="about-faq">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-subtitle">COMMON QUESTIONS</span>
+                    <h2 class="section-title">Frequently Asked <span class="text-gradient">Questions</span></h2>
+                    <p class="section-description">
+                        Have questions about how AgroSense works? Find clear answers to the most common queries below.
+                    </p>
+                </div>
+
+                <div class="about-faq-grid">
+
+                    <div class="about-faq-group">
+                        <h3 class="about-faq-group-title"><i class="fas fa-seedling"></i> Crop Recommendations</h3>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                How does the crop recommendation engine determine which crops to suggest?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Our recommendation module analyses seven soil and environmental inputs ï¿½ including NPK values, pH, temperature, humidity and rainfall ï¿½ then compares them with trusted crop performance records to recommend the most suitable planting options for your farm.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                Can I use AgroSense if my farm size is small?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Absolutely. AgroSense is engineered for farms of all sizes, from smallholders to commercial producers. The system adapts its suggestions to your specific land area and inputs, so small farms can benefit just as much as larger operations.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                Does it support crop rotation planning?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Yes. Our crop recommendation logic takes crop rotation and soil health into account, helping you plan cycles that preserve nutrients and reduce pest pressure over time.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-faq-group">
+                        <h3 class="about-faq-group-title"><i class="fas fa-chart-line"></i> Price Prediction</h3>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                How accurate are the price predictions?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Our models have been validated on historical market data and typically exceed 90% accuracy in test environments. Forecasts are presented as guidance, not guarantees, because real-world markets can still shift with unexpected events.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                How far ahead can I forecast prices?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>AgroSense delivers short- to medium-term price outlooks that are most useful for harvest planning and sales timing. The platform continues to refine its forecasting horizon as more timely market data becomes available.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                What happens if market conditions change rapidly?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>We recommend using our forecasts alongside current market intelligence and your own local knowledge. Rapid changes are a part of agriculture, so itï¿½s best to combine model insights with real-world signals.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-faq-group">
+                        <h3 class="about-faq-group-title"><i class="fas fa-chart-bar"></i> Market Analysis</h3>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                Why is market price analysis important?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Market price analysis helps you understand demand cycles and competitive pricing. It reveals the best moments to market your crops, and highlights when prices are strong enough to justify storage or transport investments.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                Can I compare prices across different crops?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Yes. The Market Price Analysis tools are designed to let you compare commodity performance over time, spot seasonal advantages, and prioritize the crops most likely to deliver the best return.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-faq-group">
+                        <h3 class="about-faq-group-title"><i class="fas fa-database"></i> Data & Trust</h3>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                Is my farm data secure?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Yes. Data sent through AgroSense is encrypted and stored securely. Personal and farm details remain private and are never shared without your consent.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                Should I use this alongside local agricultural advice?
+                                <i class="fas fa-chevron-down faq-icon"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Definitely. AgroSense is meant to complement your experience and local insights, not replace them. Combining expert advice with AI recommendations delivers the strongest outcomes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <section class="footer-about" aria-labelledby="footer-brand">
+                    <h2 class="footer-logo" id="footer-brand">
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
+                        <span>AgroSense</span>
+                    </h2>
+                    <p class="footer-description">Data-driven farming for a resilient future.</p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                        <a href="https://www.x.com" aria-label="X">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" focusable="false">
+                                <path d="M18.901 1.153h3.68l-8.041 9.19L24 22.847h-7.406l-5.8-7.584-6.639 7.584H.474l8.6-9.83L0 1.153h7.594l5.243 6.932 6.064-6.932Zm-1.291 19.494h2.039L6.486 3.238H4.298L17.61 20.647Z"></path>
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                        <a href="https://www.linkedin.com" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+                    </div>
+                </section>
+
+                <nav class="footer-links" aria-label="Explore">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="index.html#home">Home</a></li>
+                        <li><a href="index.html#features">Features</a></li>
+                        <li><a href="index.html#how-it-works">How it works</a></li>
+                        <li><a href="index.html#what-you-gain">What You Gain</a></li>
+                    </ul>
+                </nav>
+
+                <nav class="footer-links" aria-label="Information">
+                    <h4>Information</h4>
+                    <ul>
+                        <li><a href="about.html">About us</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="privacy.html">Privacy</a></li>
+                        <li><a href="terms.html">Terms</a></li>
+                    </ul>
+                </nav>
+
+                <section class="footer-contact" aria-labelledby="contact-heading">
+                    <h4 id="contact-heading">Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Kwara, Nigeria</li>
+                        <li><i class="fas fa-phone-alt" aria-hidden="true"></i> +234 (813) 705-1346</li>
+                        <li><i class="fas fa-envelope" aria-hidden="true"></i> hello@agrisense.ag</li>
+                        <li><i class="fas fa-clock" aria-hidden="true"></i> Mon-Fri: 8am - 6pm</li>
+                    </ul>
+                </section>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 AgroSense - smart agricultural decision support platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#about-home" class="back-to-top" id="backToTop" aria-label="Back to top">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </a>
+
+    <script src="about.js"></script>
+</body>
+</html>

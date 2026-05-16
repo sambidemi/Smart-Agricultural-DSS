@@ -1,43 +1,136 @@
 from pathlib import Path
-import re
+import json
+import math
+import os
+import urllib.parse
+import urllib.request
 from uuid import uuid4
 from datetime import datetime
 
 import joblib
 import pandas as pd
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 from sqlalchemy.orm import Session
+from jose import jwt
 
 from .auth import hash_password, verify_password
-from .database import get_db
+from .database import get_db, engine
 from .models import CropInput, FarmInfo, RecommendedCrop, User, PriceInput, PricePrediction
-from .schemas import ProfileUpdate, cropfeatures, pricefeatures
+from .schemas import ProfileUpdate, cropfeatures, pricefeatures, marketanalysisfeatures
 from .token import create_access_token, get_current_user
+
+# Load environment variables from .env file if it exists
+load_dotenv()
 
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR.parent / "my project"
 UPLOADS_DIR = BASE_DIR / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)
 
 # CORS allows browser-based frontend apps (different origin) to call this API.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:3000",
-        "http://localhost:3000",
-    ],
+    # Local development mode: allow any origin so the frontend can reach the backend
+    # regardless of whether the page is opened from a server or direct filesystem.
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# OAuth provider configuration. Set these in environment variables for real provider integration.
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID", "")
+APPLE_TEAM_ID = os.getenv("APPLE_TEAM_ID", "")
+FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "http://127.0.0.1:8000/oauth-callback.html")
+BACKEND_BASE_URL = os.getenv("BACKEND_BASE_URL", "http://127.0.0.1:8000")
+
+
+def _urlencode(data: dict) -> bytes:
+    return urllib.parse.urlencode(data).encode()
+
+
+def _http_request(url: str, data: bytes = None, headers: dict = None, method: str = "GET") -> dict:
+    request = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            return json.loads(response.read().decode())
+    except urllib.error.HTTPError as exc:
+        try:
+            body = exc.read().decode()
+            return json.loads(body)
+        except Exception:
+            raise HTTPException(status_code=502, detail=f"OAuth provider error: {exc.reason}")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"OAuth request failed: {exc}")
+
+
+def _create_social_redirect(user: User, provider: str) -> RedirectResponse:
+    access_token = create_access_token(data={"user_id": user.id})
+    redirect_url = f"{FRONTEND_OAUTH_REDIRECT}?token={urllib.parse.quote(access_token)}&provider={provider}"
+    return RedirectResponse(url=redirect_url)
+
+
+def _oauth_callback_url(provider: str) -> str:
+    return f"{BACKEND_BASE_URL.rstrip('/')}/auth/{provider}/callback"
+
+
+def _create_or_get_user(email: str, name: str, db: Session, profile_picture: str = None) -> User:
+    if not email:
+        raise HTTPException(status_code=400, detail="Social provider did not return an email address")
+
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        return user
+
+    user = User(
+        name=name or email.split("@")[0],
+        email=email,
+        password=hash_password(str(uuid4())),
+        location="Unknown",
+        phone_number="+2340000000000",
+        profile_picture=profile_picture,
+    )
+    db.add(user)
+    db.flush()
+
+    farm = FarmInfo(
+        user_id=user.id,
+        farm_type="Unknown",
+        farm_size=0.0,
+        soil_type="Unknown",
+        water_source="Unknown",
+    )
+    db.add(farm)
+    db.commit()
+    return user
+
+
+def _decode_apple_id_token(id_token: str) -> dict:
+    return jwt.decode(id_token, key="", algorithms=["RS256"], options={"verify_signature": False})
+
 # Expose uploaded profile images as static files under /uploads/*
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
+
+@app.on_event("startup")
+def ensure_history_timestamp_columns():
+    # Keeps legacy databases compatible with history table rendering.
+    with engine.begin() as connection:
+        connection.execute(
+            text("ALTER TABLE crop_inputs ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        )
+        connection.execute(
+            text("ALTER TABLE price_inputs ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        )
 
 
 @app.post("/signup")
@@ -111,6 +204,132 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
     }
 
 
+@app.get("/auth/google")
+def google_auth():
+    # Initiates Google OAuth flow by redirecting to Google's authorization endpoint.
+    if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID.strip() == "":
+        raise HTTPException(
+            status_code=500,
+            detail="Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file. Get credentials from https://console.developers.google.com/"
+        )
+
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": _oauth_callback_url("google"),
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "consent",
+    }
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    return RedirectResponse(url=auth_url)
+
+
+@app.get("/auth/google/callback")
+def google_auth_callback(code: str, db: Session = Depends(get_db)):
+    # Handles the OAuth callback from Google, exchanges code for tokens, and creates/updates user.
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET or GOOGLE_CLIENT_ID.strip() == "" or GOOGLE_CLIENT_SECRET.strip() == "":
+        raise HTTPException(
+            status_code=500,
+            detail="Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file."
+        )
+
+    # Exchange authorization code for access token
+    token_data = _http_request(
+        "https://oauth2.googleapis.com/token",
+        data=_urlencode({
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": _oauth_callback_url("google"),
+        }),
+        method="POST",
+    )
+
+    if "error" in token_data:
+        raise HTTPException(status_code=400, detail=f"Google OAuth error: {token_data['error']}")
+
+    # Get user info from Google
+    user_info = _http_request(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {token_data['access_token']}"},
+    )
+
+    # Create or get user account
+    user = _create_or_get_user(
+        email=user_info.get("email"),
+        name=user_info.get("name"),
+        db=db,
+        profile_picture=user_info.get("picture"),
+    )
+
+    return _create_social_redirect(user, "google")
+
+
+@app.get("/auth/apple")
+def apple_auth():
+    # Initiates Apple Sign-In flow by redirecting to Apple's authorization endpoint.
+    if not APPLE_CLIENT_ID or APPLE_CLIENT_ID.strip() == "":
+        raise HTTPException(
+            status_code=500,
+            detail="Apple OAuth is not configured. Please set APPLE_CLIENT_ID and APPLE_TEAM_ID in your .env file. Get credentials from https://developer.apple.com/account/"
+        )
+
+    params = {
+        "client_id": APPLE_CLIENT_ID,
+        "redirect_uri": _oauth_callback_url("apple"),
+        "response_type": "code id_token",
+        "scope": "name email",
+        "response_mode": "form_post",
+    }
+    auth_url = f"https://appleid.apple.com/auth/authorize?{urllib.parse.urlencode(params)}"
+    return RedirectResponse(url=auth_url)
+
+
+@app.post("/auth/apple/callback")
+def apple_auth_callback(
+    code: str = Form(...),
+    id_token: str = Form(...),
+    user: str = Form(None),
+    db: Session = Depends(get_db),
+):
+    # Handles the OAuth callback from Apple, validates the ID token, and creates/updates user.
+    if not APPLE_CLIENT_ID or not APPLE_TEAM_ID or APPLE_CLIENT_ID.strip() == "" or APPLE_TEAM_ID.strip() == "":
+        raise HTTPException(
+            status_code=500,
+            detail="Apple OAuth is not configured. Please set APPLE_CLIENT_ID and APPLE_TEAM_ID in your .env file."
+        )
+
+    # Decode the ID token to get user info
+    try:
+        decoded_token = _decode_apple_id_token(id_token)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid Apple ID token: {e}")
+
+    # Extract user info from ID token
+    email = decoded_token.get("email")
+    name = decoded_token.get("name") or decoded_token.get("preferred_username")
+
+    # If user info is in the form data (first-time sign-in), parse it
+    if user:
+        try:
+            user_data = json.loads(user)
+            if user_data.get("name"):
+                name = f"{user_data['name'].get('firstName', '')} {user_data['name'].get('lastName', '')}".strip()
+        except Exception:
+            pass  # Ignore parsing errors
+
+    # Create or get user account
+    user_obj = _create_or_get_user(
+        email=email,
+        name=name,
+        db=db,
+    )
+
+    return _create_social_redirect(user_obj, "apple")
+
+
 @app.get("/dashboard")
 def get_user_details(
     user_id: int = Depends(get_current_user),
@@ -160,7 +379,30 @@ state_encoder = joblib.load (BASE_DIR / "models"/ "state_encoder.pkl")
 unit_encoder = joblib.load (BASE_DIR / "models"/ "unit_encoder.pkl")
 price_model = joblib.load (BASE_DIR / "models"/"decision_tree_regressor.pkl")
 market_locations_df = pd.read_csv(BASE_DIR / "data" / "market_locations.csv")
+def round_up_to_tens(value: float) -> float:
+    return float(math.ceil(float(value) / 10) * 10)
 
+
+def normalize_text(value: str) -> str:
+    return str(value).strip().lower()
+
+
+def normalize_market_unit(value: str) -> str:
+    unit_mapping = {
+        "millilitres": "ml",
+        "milliliters": "ml",
+        "ml": "ml",
+        "liters": "l",
+        "litres": "l",
+        "l": "l",
+        "grams": "g",
+        "gram": "g",
+        "g": "g",
+        "kilograms": "kg",
+        "kilogram": "kg",
+        "kg": "kg",
+    }
+    return unit_mapping.get(normalize_text(value), normalize_text(value))
 
 
 # Crop Recommendation Endpoint
@@ -261,8 +503,51 @@ def get_latest_recommendations(
                 },
                 "agro_zone": crop_input.agro_environmental_zone,
                 "recommended_crop": recommendation.crop_name,
+                "created_at": crop_input.created_at.isoformat() if crop_input.created_at else None,
             }
         }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/recommend-crop/history")
+def get_recommendation_history(
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Returns full recommendation history for the logged-in user.
+    try:
+        rows = (
+            db.query(CropInput, RecommendedCrop)
+            .join(RecommendedCrop, RecommendedCrop.crop_input_id == CropInput.id)
+            .filter(CropInput.user_id == user_id)
+            .order_by(CropInput.id.desc())
+            .all()
+        )
+
+        history = []
+        for crop_input, recommendation in rows:
+            history.append(
+                {
+                    "crop_input_id": crop_input.id,
+                    "features": {
+                        "nitrogen": crop_input.nitrogen,
+                        "phosphorus": crop_input.phosphorus,
+                        "potassium": crop_input.potassium,
+                        "temperature": crop_input.temperature,
+                        "humidity": crop_input.humidity,
+                        "ph": crop_input.ph,
+                        "rainfall": crop_input.rainfall,
+                    },
+                    "agro_zone": crop_input.agro_environmental_zone,
+                    "recommended_crop": recommendation.crop_name,
+                    "created_at": crop_input.created_at.isoformat() if crop_input.created_at else None,
+                }
+            )
+
+        return {"history": history}
     except HTTPException:
         raise
     except Exception as e:
@@ -579,9 +864,289 @@ def get_latest_price_prediction(
                     "date": date_value,
                 },
                 "predicted_price": prediction.predicted_price,
+                "created_at": price_input.created_at.isoformat() if price_input.created_at else None,
             }
         }
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/predict-price/history")
+def get_price_prediction_history(
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Returns full price prediction history for the logged-in user.
+    try:
+        rows = (
+            db.query(PriceInput, PricePrediction)
+            .join(PricePrediction, PricePrediction.price_input_id == PriceInput.id)
+            .filter(PriceInput.user_id == user_id)
+            .order_by(PriceInput.id.desc())
+            .all()
+        )
+
+        month_to_num = {
+            "january": 1,
+            "february": 2,
+            "march": 3,
+            "april": 4,
+            "may": 5,
+            "june": 6,
+            "july": 7,
+            "august": 8,
+            "september": 9,
+            "october": 10,
+            "november": 11,
+            "december": 12,
+        }
+
+        history = []
+        for price_input, prediction in rows:
+            month_label = None
+            month_num = None
+            stored_month = price_input.month
+
+            if isinstance(stored_month, int) and 1 <= stored_month <= 12:
+                month_num = stored_month
+                month_label = datetime(2000, month_num, 1).strftime("%B")
+            else:
+                try:
+                    decoded_month = month_encoder.inverse_transform([stored_month])[0]
+                    month_label = str(decoded_month)
+                    month_num = month_to_num.get(month_label.strip().lower())
+                except Exception:
+                    try:
+                        maybe_month_num = int(stored_month)
+                        if 1 <= maybe_month_num <= 12:
+                            month_num = maybe_month_num
+                            month_label = datetime(2000, month_num, 1).strftime("%B")
+                    except Exception:
+                        month_label = str(stored_month)
+                        month_num = month_to_num.get(month_label.strip().lower())
+
+            date_value = None
+            if month_num and price_input.day and price_input.year:
+                try:
+                    date_value = datetime(price_input.year, month_num, price_input.day).strftime("%Y-%m-%d")
+                except Exception:
+                    date_value = None
+
+            history.append(
+                {
+                    "price_input_id": price_input.id,
+                    "features": {
+                        "state": price_input.state,
+                        "LGA": price_input.lga,
+                        "market": price_input.market,
+                        "pricetype": price_input.pricetype,
+                        "category": price_input.category,
+                        "commodity": price_input.commodity,
+                        "quantity": price_input.quantity,
+                        "unit": price_input.unit,
+                        "year": price_input.year,
+                        "month": month_label,
+                        "day": price_input.day,
+                        "date": date_value,
+                    },
+                    "predicted_price": prediction.predicted_price,
+                    "created_at": price_input.created_at.isoformat() if price_input.created_at else None,
+                }
+            )
+
+        return {"history": history}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+  
+
+@app.post("/market-analysis")
+async def market_analysis(
+    features: marketanalysisfeatures,
+):
+    # Aggregate historical market data for a selected commodity/year/pricetype/unit.
+    try:
+        normalized_unit = normalize_market_unit(features.unit)
+        market_analysis_df = pd.read_csv(BASE_DIR / "data" / "filtered_crop.csv")
+        filtered_df = market_analysis_df.copy()
+        price_column = "price (NGN)"
+
+        if price_column not in filtered_df.columns:
+            raise HTTPException(status_code=500, detail="Price column not found in market analysis dataset")
+
+        filtered_df["commodity_normalized"] = filtered_df["commodity"].astype(str).map(normalize_text)
+        filtered_df["pricetype_normalized"] = filtered_df["pricetype"].astype(str).map(normalize_text)
+        filtered_df["unit_normalized"] = filtered_df["unit"].astype(str).map(normalize_market_unit)
+        filtered_df["month"] = filtered_df["month"].astype(str).str.strip()
+        filtered_df["year"] = pd.to_numeric(filtered_df["year"], errors="coerce")
+        filtered_df[price_column] = pd.to_numeric(filtered_df[price_column], errors="coerce")
+
+        filtered_df = filtered_df.dropna(subset=["year", price_column])
+        filtered_df["year"] = filtered_df["year"].astype(int)
+
+        filtered_df = filtered_df[
+            (filtered_df["commodity_normalized"] == normalize_text(features.commodity))
+            & (filtered_df["pricetype_normalized"] == normalize_text(features.pricetype))
+            & (filtered_df["year"] == features.year)
+            & (filtered_df["unit_normalized"] == normalized_unit)
+        ]
+
+        if filtered_df.empty:
+            raise HTTPException(
+                status_code=404,
+                detail="No market analysis data found for the selected commodity, pricetype, year, and unit",
+            )
+
+        month_order = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ]
+
+        average_price_per_month = []
+        monthly_averages = filtered_df.groupby("month", as_index=False)[price_column].mean()
+        monthly_averages["month"] = pd.Categorical(
+            monthly_averages["month"],
+            categories=month_order,
+            ordered=True,
+        )
+        monthly_averages = monthly_averages.sort_values("month")
+        for row in monthly_averages.itertuples(index=False):
+            average_price_per_month.append(
+                {
+                    "month": row.month,
+                    "average_price": round_up_to_tens(row[1]),
+                }
+            )
+
+        average_price_across_states = []
+        state_averages = (
+            filtered_df.groupby("state", as_index=False)[price_column]
+            .mean()
+            .sort_values("state")
+        )
+        for row in state_averages.itertuples(index=False):
+            average_price_across_states.append(
+                {
+                    "state": row.state,
+                    "average_price": round_up_to_tens(row[1]),
+                }
+            )
+
+        average_price_across_markets = []
+        market_averages = (
+            filtered_df.groupby(["state", "market"], as_index=False)[price_column]
+            .mean()
+            .sort_values(["state", "market"])
+        )
+        for row in market_averages.itertuples(index=False):
+            average_price_across_markets.append(
+                {
+                    "state": row.state,
+                    "market": row.market,
+                    "average_price": round_up_to_tens(row[2]),
+                }
+            )
+
+        total_markets = int(filtered_df["market"].nunique())
+
+        return {
+            "commodity": features.commodity,
+            "pricetype": features.pricetype,
+            "year": features.year,
+            "total_markets": total_markets,
+            "average_price_per_month": average_price_per_month,
+            "average_price_across_states": average_price_across_states,
+            "average_price_across_markets": average_price_across_markets,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/delete-account")
+async def delete_account(
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Permanently delete a user account and all associated data.
+    This is an irreversible operation. Deletes:
+    - User profile
+    - Farm information
+    - Crop recommendations and history
+    - Price predictions and history
+    - Profile pictures from storage
+    """
+    try:
+        # Fetch the user record
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Delete user's uploaded profile picture from filesystem if it exists
+        if user.profile_picture:
+            try:
+                picture_name = Path(user.profile_picture).name
+                picture_path = UPLOADS_DIR / picture_name
+                if picture_path.exists():
+                    picture_path.unlink()
+            except Exception:
+                pass
+
+        # Delete all related records in cascade
+        # These cascading deletes are handled by ORM if foreign keys are set up correctly
+        db.query(RecommendedCrop).filter(
+            RecommendedCrop.crop_input_id.in_(
+                db.query(CropInput.id).filter(CropInput.user_id == user_id)
+            )
+        ).delete(synchronize_session=False)
+
+        db.query(CropInput).filter(CropInput.user_id == user_id).delete(synchronize_session=False)
+
+        db.query(PricePrediction).filter(
+            PricePrediction.price_input_id.in_(
+                db.query(PriceInput.id).filter(PriceInput.user_id == user_id)
+            )
+        ).delete(synchronize_session=False)
+
+        db.query(PriceInput).filter(PriceInput.user_id == user_id).delete(synchronize_session=False)
+
+        db.query(FarmInfo).filter(FarmInfo.user_id == user_id).delete(synchronize_session=False)
+
+        # Finally, delete the user record itself
+        db.query(User).filter(User.id == user_id).delete(synchronize_session=False)
+
+        db.commit()
+
+        return {
+            "message": "Account deleted successfully",
+            "status": "deleted"
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting account: {str(e)}")
+
+
+# Serve the static frontend from the same local server as the API.
+# Keep this mount after API routes so endpoints like /dashboard keep working.
+if FRONTEND_DIR.exists():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+

@@ -60,6 +60,13 @@ class AuthManager {
         return payload;
     }
 
+    // Initiates real OAuth flow by redirecting to the backend OAuth endpoint.
+    // The backend will redirect to the provider's OAuth page.
+    static initiateOAuth(provider) {
+        const oauthUrl = this.buildUrl(`/auth/${provider}`);
+        window.location.href = oauthUrl;
+    }
+
     static async fetchDashboardProfile(token) {
         const response = await fetch(this.buildUrl('/dashboard'), {
             method: 'GET',
@@ -103,25 +110,13 @@ class AuthManager {
         const submitBtn = document.getElementById('loginBtnSubmit');
         const toggleBtns = form?.querySelectorAll('.toggle-password') || [];
 
-        // Initialize password toggles
+        // Initialize password toggles and social authentication buttons.
         this.initPasswordToggles(toggleBtns);
+        this.initSocialButtons();
 
         if (form) {
             form.addEventListener('submit', (e) => this.handleLogin(e, emailInput, passwordInput, submitBtn));
         }
-
-        // Forgot password handler
-        const forgotLink = document.getElementById('forgotPasswordLink');
-        if (forgotLink) {
-            forgotLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.showToast('Password reset link sent to your email', 'info');
-            });
-        }
-
-        // Social auth handlers
-        document.getElementById('googleAuth')?.addEventListener('click', () => this.handleSocialAuth('google'));
-        document.getElementById('appleAuth')?.addEventListener('click', () => this.handleSocialAuth('apple'));
     }
 
     static initSignup() {
@@ -133,6 +128,7 @@ class AuthManager {
         const backBtn = document.getElementById('signupBackBtn');
 
         this.initPasswordToggles(toggleBtns);
+        this.initSocialButtons();
         this.setSignupStep(1);
 
         // Password strength indicator
@@ -146,21 +142,6 @@ class AuthManager {
         if (form) {
             form.addEventListener('submit', (e) => this.handleSignup(e, submitBtn));
         }
-
-        // Social auth handlers
-        document.getElementById('googleSignup')?.addEventListener('click', () => this.handleSocialAuth('google'));
-        document.getElementById('appleSignup')?.addEventListener('click', () => this.handleSocialAuth('apple'));
-
-        // Terms links
-        document.getElementById('termsLink')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showToast('View Terms of Service', 'info');
-        });
-        
-        document.getElementById('privacyLink')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showToast('View Privacy Policy', 'info');
-        });
     }
 
     static setSignupStep(step) {
@@ -274,6 +255,43 @@ class AuthManager {
         } else {
             strengthBar.classList.add('strong');
             strengthText.textContent = 'Strong password';
+        }
+    }
+
+    // Attach login handlers to social sign-in buttons in both login and signup flows.
+    static initSocialButtons() {
+        const buttons = [
+            { selector: '#googleAuth', provider: 'google' },
+            { selector: '#appleAuth', provider: 'apple' },
+            { selector: '#googleSignup', provider: 'google' },
+            { selector: '#appleSignup', provider: 'apple' }
+        ];
+
+        buttons.forEach(({ selector, provider }) => {
+            const button = document.querySelector(selector);
+            if (!button) return;
+
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await this.handleSocialAuth(provider);
+            });
+        });
+    }
+
+    // Trigger a social login flow and persist auth state after a successful response.
+    static async handleSocialAuth(provider) {
+        try {
+            // For real OAuth, redirect to the backend OAuth endpoint
+            this.initiateOAuth(provider);
+        } catch (error) {
+            if (error.message === 'Failed to fetch') {
+                this.showToast('Cannot reach the backend. Start the backend server and open the page from a local web server.', 'error');
+            } else if (error.message.includes('OAuth is not configured')) {
+                // Show the detailed configuration message from backend
+                this.showToast(error.message, 'error');
+            } else {
+                this.showToast(error.message || `Failed to sign in with ${provider}`, 'error');
+            }
         }
     }
 
@@ -528,13 +546,6 @@ class AuthManager {
             submitBtn.disabled = false;
             this.showToast(error.message || 'Signup failed', 'error');
         }
-    }
-
-    static handleSocialAuth(provider) {
-        const providerLabel = String(provider || 'Social')
-            .toLowerCase()
-            .replace(/^\w/, (char) => char.toUpperCase());
-        this.showToast(`${providerLabel} sign-in is coming soon`, 'info');
     }
 }
 

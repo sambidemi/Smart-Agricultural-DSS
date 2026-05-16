@@ -57,3 +57,9 @@ class pricefeatures (BaseModel):
     month: str = Field (..., example = 'April')
     day:int = Field(..., example = 15)
 
+class marketanalysisfeatures (BaseModel):
+    commodity: str = Field(..., example = "Maize")
+    year: int = Field(..., example = 2025)
+    pricetype: str = Field(..., example = "Retail")
+    unit: str = Field(..., example = "kg")
+    

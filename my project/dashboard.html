@@ -104,7 +104,6 @@
                 </div>
             </header>
 
-            <!-- Dashboard Content -->
             <div class="dashboard-content">
                 <!-- Welcome Dashboard (Default View) -->
                 <div class="content-page active" id="page-dashboard">
@@ -205,24 +204,209 @@
                 </div>
 
                 <div class="content-page" id="page-market-analysis">
-                    <div class="placeholder-page">
-                        <div class="placeholder-icon">
-                            <i class="fas fa-chart-simple"></i>
-                        </div>
-                        <h2>Market Price Analysis</h2>
-                        <p>Visualize price trends and make informed selling decisions.</p>
-                        <button class="btn-primary">View Analysis</button>
+                    <div class="market-analysis-page">
+                        <section class="market-analysis-hero">
+                            <div>
+                                <div class="market-analysis-kicker">
+                                    <i class="fas fa-chart-simple"></i>
+                                    <span>Market Price Analysis</span>
+                                </div>
+                                <h2>Track market trends before you decide when and where to sell</h2>
+                                <p>Filter by commodity, price type, year, and unit to explore historical average prices across months, states, and markets.</p>
+                            </div>
+                        </section>
+
+                        <section class="market-analysis-shell">
+                            <form class="market-analysis-filter-card" id="marketAnalysisForm">
+                                <div class="market-analysis-filter-head">
+                                    <div>
+                                        <h3>Analysis Filters</h3>
+                                        <p>Choose the market slice you want to study.</p>
+                                    </div>
+                                    <button type="submit" class="btn-primary" id="marketAnalysisSubmitBtn">
+                                        <span class="btn-text">Run Analysis</span>
+                                        <span class="btn-loader hidden"><i class="fas fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+
+                                <div class="market-analysis-filter-grid">
+                                    <div class="input-group">
+                                        <label for="marketAnalysisCommodity">Commodity</label>
+                                        <div class="select-shell">
+                                            <select id="marketAnalysisCommodity">
+                                                <option value="">Select commodity</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group">
+                                        <label for="marketAnalysisPriceType">Price Type</label>
+                                        <div class="select-shell">
+                                            <select id="marketAnalysisPriceType">
+                                                <option value="">Select price type</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group">
+                                        <label for="marketAnalysisYear">Year</label>
+                                        <div class="select-shell">
+                                            <select id="marketAnalysisYear">
+                                                <option value="">Select year</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group">
+                                        <label for="marketAnalysisUnit">Unit</label>
+                                        <div class="select-shell">
+                                            <select id="marketAnalysisUnit" disabled>
+                                                <option value="">Select unit</option>
+                                            </select>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <section class="market-analysis-results" id="marketAnalysisResults">
+                                <div class="market-analysis-empty" id="marketAnalysisEmptyState">
+                                    <div class="placeholder-icon">
+                                        <i class="fas fa-chart-simple"></i>
+                                    </div>
+                                    <h3>Run a market analysis</h3>
+                                    <p>Your result cards and price charts will appear here after you submit the filters.</p>
+                                </div>
+
+                                <div class="market-analysis-content hidden" id="marketAnalysisContent">
+                                    <div class="market-analysis-metrics" id="marketAnalysisMetrics"></div>
+
+                                    <div class="market-analysis-chart-grid">
+                                        <article class="market-chart-card">
+                                            <div class="market-chart-card-head">
+                                                <h3>Average Price Per Month</h3>
+                                                <p>Monthly historical averages for the selected market slice.</p>
+                                            </div>
+                                            <div class="market-chart market-chart-months" id="monthlyPriceChart"></div>
+                                        </article>
+
+                                        <article class="market-chart-card">
+                                            <div class="market-chart-card-head">
+                                                <h3>Average Price Across States</h3>
+                                                <p>Compare state-level average prices.</p>
+                                            </div>
+                                            <div class="market-chart market-chart-bars" id="statePriceChart"></div>
+                                        </article>
+                                    </div>
+
+                                    <article class="market-chart-card market-chart-card-full">
+                                        <div class="market-chart-card-head">
+                                            <h3>Average Price Across Markets</h3>
+                                            <p>See how average prices vary from market to market.</p>
+                                        </div>
+                                        <div class="market-chart market-chart-bars" id="marketPriceChart"></div>
+                                    </article>
+                                </div>
+                            </section>
+                        </section>
                     </div>
                 </div>
 
                 <div class="content-page" id="page-history">
-                    <div class="placeholder-page">
-                        <div class="placeholder-icon">
-                            <i class="fas fa-history"></i>
-                        </div>
-                        <h2>Your History</h2>
-                        <p>Your past recommendations and predictions will appear here.</p>
-                        <p class="text-muted">Start using the tools to build your history.</p>
+                    <div class="history-page">
+                        <section class="history-hero">
+                            <div class="history-hero-copy">
+                                <div class="market-analysis-kicker">
+                                    <i class="fas fa-history"></i>
+                                    <span>Activity History</span>
+                                </div>
+                                <h2>Your recent recommendation and pricing decisions in one place</h2>
+                                <p>Review previous model runs, compare recurring patterns, and keep track of the decisions you have already explored.</p>
+                            </div>
+                            <div class="history-stats-grid">
+                                <article class="history-stat-card">
+                                    <span class="history-stat-label">Recommendations</span>
+                                    <strong class="history-stat-value" id="historyRecommendationCount">0</strong>
+                                </article>
+                                <article class="history-stat-card">
+                                    <span class="history-stat-label">Predictions</span>
+                                    <strong class="history-stat-value" id="historyPredictionCount">0</strong>
+                                </article>
+                            </div>
+                        </section>
+
+                        <section class="history-stack">
+                            <article class="history-panel">
+                                <div class="history-panel-head">
+                                    <div>
+                                        <h3>Crop Recommendation History</h3>
+                                        <p>Crop recommendation runs appear first, with input features as columns and recommendation date at the end.</p>
+                                    </div>
+                                </div>
+                                <div class="history-empty hidden" id="historyRecommendationEmpty">
+                                    <div class="placeholder-icon">
+                                        <i class="fas fa-seedling"></i>
+                                    </div>
+                                    <p>No crop recommendation history yet.</p>
+                                </div>
+                                <div class="history-table-wrap" id="historyRecommendationWrap">
+                                    <table class="history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Recommended Crop</th>
+                                                <th>Agro Zone</th>
+                                                <th>Nitrogen (kg/ha)</th>
+                                                <th>Phosphorus (kg/ha)</th>
+                                                <th>Potassium (kg/ha)</th>
+                                                <th>Temperature (deg C)</th>
+                                                <th>Humidity (%)</th>
+                                                <th>Soil pH</th>
+                                                <th>Rainfall (mm)</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="historyRecommendationList"></tbody>
+                                    </table>
+                                </div>
+                            </article>
+
+                            <article class="history-panel">
+                                <div class="history-panel-head">
+                                    <div>
+                                        <h3>Price Prediction History</h3>
+                                        <p>Price prediction runs stay below the crop history, using your selected features as table headers.</p>
+                                    </div>
+                                </div>
+                                <div class="history-empty hidden" id="historyPredictionEmpty">
+                                    <div class="placeholder-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <p>No price prediction history yet.</p>
+                                </div>
+                                <div class="history-table-wrap" id="historyPredictionWrap">
+                                    <table class="history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>State</th>
+                                                <th>LGA</th>
+                                                <th>Market</th>
+                                                <th>Price Type</th>
+                                                <th>Category</th>
+                                                <th>Commodity</th>
+                                                <th>Quantity</th>
+                                                <th>Unit</th>
+                                                <th>Forecast Date</th>
+                                                <th>Predicted Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="historyPredictionList"></tbody>
+                                    </table>
+                                </div>
+                            </article>
+                        </section>
                     </div>
                 </div>
 
@@ -268,7 +452,7 @@
                                             <label>Farm Type</label>
                                             <div class="select-shell">
                                                 <select id="editFarmType">
-                                                    <option value="">Select farm type</option>
+                                                    <option value="" selected>Select farm type</option>
                                                     <option value="Crop Farming">Crop Farming</option>
                                                     <option value="Livestock">Livestock</option>
                                                     <option value="Mixed Farming">Mixed Farming</option>
@@ -288,7 +472,7 @@
                                             <label>Soil Type</label>
                                             <div class="select-shell">
                                                 <select id="editSoilType">
-                                                    <option value="">Select soil type</option>
+                                                    <option value="" selected>Select soil type</option>
                                                     <option value="Clay">Clay</option>
                                                     <option value="Sandy">Sandy</option>
                                                     <option value="Silt">Silt</option>
@@ -303,7 +487,7 @@
                                             <label>Water Source</label>
                                             <div class="select-shell">
                                                 <select id="editWaterSource">
-                                                    <option value="">Select water source</option>
+                                                    <option value="" selected>Select water source</option>
                                                     <option value="Rain-fed">Rain-fed</option>
                                                     <option value="Irrigation">Irrigation</option>
                                                     <option value="River">River</option>
@@ -316,6 +500,7 @@
                                     </div>
                                     <div class="form-actions">
                                         <button type="submit" class="btn-primary">Save Changes</button>
+                                        <button type="button" class="btn-danger" id="deleteAccountBtn">Delete Account</button>
                                     </div>
                                 </form>
                             </div>
@@ -481,6 +666,25 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div class="delete-modal hidden" id="deleteModal" aria-hidden="true">
+        <div class="delete-modal-backdrop" id="deleteModalBackdrop"></div>
+        <div class="delete-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <div class="delete-modal-content">
+                <div class="delete-modal-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 id="deleteModalTitle">Delete Account</h3>
+                <p class="delete-modal-warning">Are you sure you want to delete your account? This action cannot be undone.</p>
+                <p class="delete-modal-info">Your profile, farm information, and all recommendations will be permanently removed.</p>
+                <div class="delete-modal-actions">
+                    <button type="button" class="btn-outline" id="deleteCancelBtn">Cancel</button>
+                    <button type="button" class="btn-danger" id="deleteConfirmBtn">Delete My Account</button>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -9,6 +9,7 @@ class DashboardManager {
         this.messageRotationTimer = null;
         this.recommendationHistoryLoaded = false;
         this.pricePredictionHistoryLoaded = false;
+        this.marketAnalysisInitialized = false;
         this.init();
     }
 
@@ -16,6 +17,7 @@ class DashboardManager {
         this.cacheElements();
         if (!this.ensureAuthenticatedSession()) return;
         this.initPricePredictionModule();
+        this.initMarketAnalysisModule();
         this.bindEvents();
         this.updateUI();
         this.initDynamicWelcomeMessage();
@@ -96,6 +98,39 @@ class DashboardManager {
             quantity: document.getElementById('quantityInput'),
             date: document.getElementById('dateInput')
         };
+
+        // Market analysis page elements.
+        this.marketAnalysisForm = document.getElementById('marketAnalysisForm');
+        this.marketAnalysisSubmitBtn = document.getElementById('marketAnalysisSubmitBtn');
+        this.marketAnalysisSubmitText = this.marketAnalysisSubmitBtn?.querySelector('.btn-text');
+        this.marketAnalysisSubmitLoader = this.marketAnalysisSubmitBtn?.querySelector('.btn-loader');
+        this.marketAnalysisEmptyState = document.getElementById('marketAnalysisEmptyState');
+        this.marketAnalysisContent = document.getElementById('marketAnalysisContent');
+        this.marketAnalysisMetrics = document.getElementById('marketAnalysisMetrics');
+        this.monthlyPriceChart = document.getElementById('monthlyPriceChart');
+        this.statePriceChart = document.getElementById('statePriceChart');
+        this.marketPriceChart = document.getElementById('marketPriceChart');
+        this.marketAnalysisFields = {
+            commodity: document.getElementById('marketAnalysisCommodity'),
+            pricetype: document.getElementById('marketAnalysisPriceType'),
+            year: document.getElementById('marketAnalysisYear'),
+            unit: document.getElementById('marketAnalysisUnit')
+        };
+
+        // History page elements.
+        this.historyRecommendationCount = document.getElementById('historyRecommendationCount');
+        this.historyPredictionCount = document.getElementById('historyPredictionCount');
+        this.historyRecommendationList = document.getElementById('historyRecommendationList');
+        this.historyPredictionList = document.getElementById('historyPredictionList');
+        this.historyRecommendationEmpty = document.getElementById('historyRecommendationEmpty');
+        this.historyPredictionEmpty = document.getElementById('historyPredictionEmpty');
+
+        // Delete account modal elements.
+        this.deleteAccountBtn = document.getElementById('deleteAccountBtn');
+        this.deleteModal = document.getElementById('deleteModal');
+        this.deleteModalBackdrop = document.getElementById('deleteModalBackdrop');
+        this.deleteCancelBtn = document.getElementById('deleteCancelBtn');
+        this.deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
     }
 
     initPricePredictionModule() {
@@ -161,6 +196,14 @@ class DashboardManager {
         this.priceTypeOptions = ['Wholesale', 'Retail'];
     }
 
+    initMarketAnalysisModule() {
+        this.marketAnalysisYears = [];
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear; year >= 2002; year -= 1) {
+            this.marketAnalysisYears.push(String(year));
+        }
+    }
+
     bindEvents() {
         if (this.uploadBtn) {
             this.uploadBtn.addEventListener('click', () => this.avatarInput.click());
@@ -173,6 +216,19 @@ class DashboardManager {
 
         if (this.profileForm) {
             this.profileForm.addEventListener('submit', (e) => this.saveProfile(e));
+        }
+
+        if (this.deleteAccountBtn) {
+            this.deleteAccountBtn.addEventListener('click', () => this.openDeleteModal());
+        }
+        if (this.deleteModalBackdrop) {
+            this.deleteModalBackdrop.addEventListener('click', () => this.closeDeleteModal());
+        }
+        if (this.deleteCancelBtn) {
+            this.deleteCancelBtn.addEventListener('click', () => this.closeDeleteModal());
+        }
+        if (this.deleteConfirmBtn) {
+            this.deleteConfirmBtn.addEventListener('click', () => this.confirmDeleteAccount());
         }
 
         if (this.startRecommendationBtn) {
@@ -201,13 +257,23 @@ class DashboardManager {
             this.predictForm.addEventListener('submit', (e) => this.submitPredictionForm(e));
         }
 
+        if (this.marketAnalysisForm) {
+            this.marketAnalysisForm.addEventListener('submit', (e) => this.submitMarketAnalysisForm(e));
+        }
+
         this.predictFields.state?.addEventListener('change', () => this.handleStateChange());
         this.predictFields.category?.addEventListener('change', () => this.handleCategoryChange());
         this.predictFields.commodity?.addEventListener('change', () => this.handleCommodityChange());
+        this.marketAnalysisFields.commodity?.addEventListener('change', () => this.handleMarketAnalysisCommodityChange());
         Object.values(this.predictFields).forEach((field) => {
             if (!field) return;
             field.addEventListener('change', () => this.togglePredictSubmitState());
             field.addEventListener('input', () => this.togglePredictSubmitState());
+        });
+        Object.values(this.marketAnalysisFields).forEach((field) => {
+            if (!field) return;
+            field.addEventListener('change', () => this.toggleMarketAnalysisSubmitState());
+            field.addEventListener('input', () => this.toggleMarketAnalysisSubmitState());
         });
 
         Object.keys(this.recommendFields).forEach((fieldKey) => {
@@ -517,6 +583,62 @@ class DashboardManager {
             this.pricePredictionHistoryLoaded = true;
         } catch (error) {
             this.showToast(error.message || 'Failed to load price prediction history.', 'error');
+        }
+    }
+
+    async loadFullHistoryPage() {
+        if (this.historyPageLoaded || !this.historyRecommendationList || !this.historyPredictionList) return;
+
+        try {
+            const [recommendationPayload, predictionPayload] = await Promise.all([
+                this.request('/recommend-crop/history', { method: 'GET' }),
+                this.request('/predict-price/history', { method: 'GET' })
+            ]);
+
+            const recommendationHistory = recommendationPayload?.history || [];
+            const predictionHistory = predictionPayload?.history || [];
+
+            this.historyRecommendationList.innerHTML = '';
+            this.historyPredictionList.innerHTML = '';
+
+            if (this.historyRecommendationCount) {
+                this.historyRecommendationCount.textContent = String(recommendationHistory.length);
+            }
+            if (this.historyPredictionCount) {
+                this.historyPredictionCount.textContent = String(predictionHistory.length);
+            }
+
+            this.historyRecommendationEmpty?.classList.toggle('hidden', recommendationHistory.length > 0);
+            this.historyPredictionEmpty?.classList.toggle('hidden', predictionHistory.length > 0);
+
+            recommendationHistory.forEach((entry, index) => {
+                this.renderRecommendationHistoryCard(entry, {
+                    target: this.historyRecommendationList,
+                    timeText: index === 0 ? 'Latest session' : `Session ${recommendationHistory.length - index}`
+                });
+            });
+
+            predictionHistory.forEach((entry, index) => {
+                const features = entry.features || {};
+                const fallbackDate = this.buildIsoDateFromParts(features.year, features.month, features.day);
+                this.renderPredictionHistoryCard({
+                    state: features.state,
+                    LGA: features.LGA,
+                    market: features.market,
+                    pricetype: features.pricetype,
+                    category: features.category,
+                    commodity: features.commodity,
+                    quantity: features.quantity,
+                    unit: features.unit,
+                    date: features.date || fallbackDate || '',
+                    predictedPrice: entry.predicted_price,
+                    timeText: index === 0 ? 'Latest session' : `Session ${predictionHistory.length - index}`
+                }, this.historyPredictionList);
+            });
+
+            this.historyPageLoaded = true;
+        } catch (error) {
+            this.showToast(error.message || 'Failed to load full history.', 'error');
         }
     }
 
@@ -845,6 +967,233 @@ class DashboardManager {
         this.predictionList.appendChild(card);
     }
 
+    renderPredictionHistoryCard(cardData, target) {
+        if (!target) return;
+        const predictedPrice = Number(cardData?.predictedPrice || 0);
+        const formattedPrice = Number.isFinite(predictedPrice)
+            ? `₦ ${predictedPrice.toLocaleString('en-NG', { maximumFractionDigits: 2 })}`
+            : '₦ 0';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td data-label="State">${cardData.state || '-'}</td>
+            <td data-label="LGA">${cardData.LGA || '-'}</td>
+            <td data-label="Market">${cardData.market || '-'}</td>
+            <td data-label="Price Type">${cardData.pricetype || '-'}</td>
+            <td data-label="Category">${cardData.category || '-'}</td>
+            <td data-label="Commodity">${cardData.commodity || '-'}</td>
+            <td data-label="Quantity">${cardData.quantity ?? '-'}</td>
+            <td data-label="Unit">${cardData.unit || '-'}</td>
+            <td data-label="Forecast Date">${cardData.date || 'Date unavailable'}</td>
+            <td data-label="Predicted Price">${formattedPrice}</td>
+        `;
+
+        target.appendChild(row);
+    }
+
+    ensureMarketAnalysisPageReady() {
+        if (this.marketAnalysisInitialized) return;
+        this.seedMarketAnalysisFormOptions();
+        this.renderMarketAnalysisEmptyState(
+            'Run a market analysis',
+            'Your result cards and price charts will appear here after you submit the filters.'
+        );
+        this.marketAnalysisInitialized = true;
+    }
+
+    seedMarketAnalysisFormOptions() {
+        const commodities = Object.keys(this.commodityToUnitsMap).sort((a, b) => a.localeCompare(b));
+        this.populateSelect(this.marketAnalysisFields.commodity, commodities, 'Select commodity');
+        this.populateSelect(this.marketAnalysisFields.pricetype, this.priceTypeOptions, 'Select price type');
+        this.populateSelect(this.marketAnalysisFields.year, this.marketAnalysisYears, 'Select year');
+        this.resetSelect(this.marketAnalysisFields.unit, 'Select unit');
+        this.toggleMarketAnalysisSubmitState();
+    }
+
+    handleMarketAnalysisCommodityChange() {
+        const commodity = this.marketAnalysisFields.commodity?.value || '';
+        const units = this.commodityToUnitsMap[commodity] || [];
+        this.populateSelect(this.marketAnalysisFields.unit, units, 'Select unit');
+        this.toggleMarketAnalysisSubmitState();
+    }
+
+    toggleMarketAnalysisSubmitState() {
+        if (!this.marketAnalysisSubmitBtn) return;
+        const requiredValues = [
+            this.marketAnalysisFields.commodity?.value,
+            this.marketAnalysisFields.pricetype?.value,
+            this.marketAnalysisFields.year?.value,
+            this.marketAnalysisFields.unit?.value
+        ];
+        const isValid = requiredValues.every((value) => Boolean(String(value || '').trim()));
+        this.marketAnalysisSubmitBtn.disabled = !isValid;
+    }
+
+    setMarketAnalysisLoadingState(isLoading) {
+        if (!this.marketAnalysisSubmitBtn) return;
+        this.marketAnalysisSubmitBtn.disabled = isLoading || this.marketAnalysisSubmitBtn.disabled;
+        this.marketAnalysisSubmitText?.classList.toggle('hidden', isLoading);
+        this.marketAnalysisSubmitLoader?.classList.toggle('hidden', !isLoading);
+    }
+
+    async submitMarketAnalysisForm(event) {
+        event.preventDefault();
+        this.toggleMarketAnalysisSubmitState();
+        if (this.marketAnalysisSubmitBtn?.disabled) return;
+
+        const payload = {
+            commodity: this.marketAnalysisFields.commodity.value,
+            pricetype: this.marketAnalysisFields.pricetype.value,
+            year: Number(this.marketAnalysisFields.year.value),
+            unit: this.marketAnalysisFields.unit.value
+        };
+
+        this.setMarketAnalysisLoadingState(true);
+        try {
+            const response = await this.request('/market-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            this.renderMarketAnalysis(response);
+            this.showToast('Market analysis generated successfully!', 'success');
+        } catch (error) {
+            this.renderMarketAnalysisEmptyState(
+                'No analysis available',
+                error.message || 'Market analysis could not be generated for the selected filters.'
+            );
+            this.showToast(error.message || 'Market analysis failed. Please try again.', 'error');
+        } finally {
+            this.setMarketAnalysisLoadingState(false);
+            this.toggleMarketAnalysisSubmitState();
+        }
+    }
+
+    renderMarketAnalysis(response) {
+        if (!this.marketAnalysisMetrics || !this.monthlyPriceChart || !this.statePriceChart || !this.marketPriceChart) return;
+
+        const summaryCards = [
+            { label: 'Commodity', value: response?.commodity || 'N/A' },
+            { label: 'Price Type', value: response?.pricetype || 'N/A' },
+            { label: 'Year', value: response?.year || 'N/A' },
+            { label: 'Total Markets', value: this.formatNumber(response?.total_markets) }
+        ];
+
+        this.marketAnalysisMetrics.innerHTML = summaryCards.map((item) => `
+            <article class="market-analysis-metric">
+                <span class="market-analysis-metric-label">${item.label}</span>
+                <span class="market-analysis-metric-value">${item.value}</span>
+            </article>
+        `).join('');
+
+        this.renderMonthlyChart(this.monthlyPriceChart, response?.average_price_per_month || []);
+        this.renderHorizontalBarChart(this.statePriceChart, response?.average_price_across_states || [], {
+            labelKey: 'state',
+            scrollable: false
+        });
+        this.renderHorizontalBarChart(this.marketPriceChart, response?.average_price_across_markets || [], {
+            labelKey: 'market',
+            secondaryLabelKey: 'state',
+            scrollable: true
+        });
+
+        this.marketAnalysisEmptyState?.classList.add('hidden');
+        this.marketAnalysisContent?.classList.remove('hidden');
+    }
+
+    renderMarketAnalysisEmptyState(title, message) {
+        if (this.marketAnalysisEmptyState) {
+            this.marketAnalysisEmptyState.innerHTML = `
+                <div class="placeholder-icon">
+                    <i class="fas fa-chart-simple"></i>
+                </div>
+                <h3>${title}</h3>
+                <p>${message}</p>
+            `;
+            this.marketAnalysisEmptyState.classList.remove('hidden');
+        }
+
+        this.marketAnalysisContent?.classList.add('hidden');
+        if (this.marketAnalysisMetrics) this.marketAnalysisMetrics.innerHTML = '';
+        if (this.monthlyPriceChart) this.monthlyPriceChart.innerHTML = '';
+        if (this.statePriceChart) this.statePriceChart.innerHTML = '';
+        if (this.marketPriceChart) this.marketPriceChart.innerHTML = '';
+    }
+
+    renderMonthlyChart(container, items) {
+        if (!container) return;
+        if (!items.length) {
+            container.innerHTML = '<div class="market-chart-empty">No monthly average price data available for this filter.</div>';
+            return;
+        }
+
+        const maxValue = Math.max(...items.map((item) => Number(item.average_price) || 0), 1);
+        container.innerHTML = `
+            <div class="market-month-chart">
+                ${items.map((item) => {
+                    const value = Number(item.average_price) || 0;
+                    const height = Math.max((value / maxValue) * 100, 8);
+                    const label = String(item.month || '').slice(0, 3);
+                    return `
+                        <div class="market-month-bar">
+                            <span class="market-month-bar-value">${this.formatCurrency(value)}</span>
+                            <div class="market-month-bar-track">
+                                <div class="market-month-bar-fill" style="height: ${height}%"></div>
+                            </div>
+                            <span class="market-month-bar-label">${label}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    renderHorizontalBarChart(container, items, options = {}) {
+        if (!container) return;
+        if (!items.length) {
+            container.innerHTML = '<div class="market-chart-empty">No price comparison data available for this filter.</div>';
+            return;
+        }
+
+        const { labelKey, secondaryLabelKey = '', scrollable = false } = options;
+        const maxValue = Math.max(...items.map((item) => Number(item.average_price) || 0), 1);
+        const chartClass = scrollable ? 'market-list-chart market-scrollable' : 'market-list-chart';
+
+        container.innerHTML = `
+            <div class="${chartClass}">
+                ${items.map((item) => {
+                    const value = Number(item.average_price) || 0;
+                    const width = Math.max((value / maxValue) * 100, 4);
+                    const primary = item?.[labelKey] || 'Unknown';
+                    const secondary = secondaryLabelKey ? item?.[secondaryLabelKey] : '';
+                    const label = secondary ? `${primary} (${secondary})` : primary;
+                    return `
+                        <div class="market-list-row">
+                            <span class="market-list-label">${label}</span>
+                            <div class="market-list-track">
+                                <div class="market-list-fill" style="width: ${width}%"></div>
+                            </div>
+                            <span class="market-list-value">${this.formatCurrency(value)}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    formatCurrency(value) {
+        const amount = Number(value || 0);
+        return `₦ ${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
+    }
+
+    formatNumber(value) {
+        const amount = Number(value || 0);
+        return amount.toLocaleString('en-NG');
+    }
+
     initDynamicWelcomeMessage() {
         if (!this.dynamicWelcomeMessage) return;
 
@@ -1071,6 +1420,29 @@ class DashboardManager {
         }
     }
 
+    renderRecommendationHistoryCard(cardData, options = {}) {
+        if (!options.target) return;
+        const features = cardData?.features || {};
+        const recommendedCrop = cardData?.recommended_crop || 'Unavailable';
+        const agroZone = cardData?.agro_zone || 'Unavailable';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td data-label="Recommended Crop">${recommendedCrop}</td>
+            <td data-label="Agro Zone">${agroZone}</td>
+            <td data-label="Nitrogen (kg/ha)">${features.nitrogen ?? '-'}</td>
+            <td data-label="Phosphorus (kg/ha)">${features.phosphorus ?? '-'}</td>
+            <td data-label="Potassium (kg/ha)">${features.potassium ?? '-'}</td>
+            <td data-label="Temperature (deg C)">${features.temperature ?? '-'}</td>
+            <td data-label="Humidity (%)">${features.humidity ?? '-'}</td>
+            <td data-label="Soil pH">${features.ph ?? '-'}</td>
+            <td data-label="Rainfall (mm)">${features.rainfall ?? '-'}</td>
+            <td data-label="Date">${cardData.created_at ? new Date(cardData.created_at).toLocaleDateString('en-GB') : '-'}</td>
+        `;
+
+        options.target.appendChild(row);
+    }
+
     showPage(pageId) {
         document.querySelectorAll('.content-page').forEach(page => {
             page.classList.remove('active');
@@ -1080,6 +1452,8 @@ class DashboardManager {
         if (targetPage) targetPage.classList.add('active');
 
         if (pageId === 'profile') this.updateProfileForm();
+        if (pageId === 'market-analysis') this.ensureMarketAnalysisPageReady();
+        if (pageId === 'history') this.loadFullHistoryPage();
     }
 
     handleAction(event) {
@@ -1107,6 +1481,53 @@ class DashboardManager {
             localStorage.removeItem('agrosense_user');
             window.location.href = 'login.html';
         }, 1000);
+    }
+
+    openDeleteModal() {
+        if (this.deleteModal) {
+            this.deleteModal.classList.remove('hidden');
+            this.deleteModal.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    closeDeleteModal() {
+        if (this.deleteModal) {
+            this.deleteModal.classList.add('hidden');
+            this.deleteModal.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    async confirmDeleteAccount() {
+        try {
+            this.deleteConfirmBtn.disabled = true;
+            this.deleteConfirmBtn.textContent = 'Deleting...';
+
+            const response = await fetch(`${this.apiBaseUrl}/delete-account`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to delete account');
+            }
+
+            this.showToast('Account deleted successfully. Redirecting...', 'success');
+            
+            setTimeout(() => {
+                localStorage.removeItem('agrosense_token');
+                localStorage.removeItem('agrosense_user');
+                window.location.href = 'login.html';
+            }, 1500);
+
+        } catch (error) {
+            this.showToast(`Error: ${error.message}`, 'error');
+            this.deleteConfirmBtn.disabled = false;
+            this.deleteConfirmBtn.textContent = 'Delete My Account';
+        }
     }
 
     initSidebar() {

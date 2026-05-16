@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from .database import Base
 
 class User(Base):
@@ -38,6 +40,7 @@ class CropInput(Base):
     ph = Column(Float)
     rainfall = Column(Float)
     agro_environmental_zone = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
 
 class RecommendedCrop(Base):
@@ -63,6 +66,7 @@ class PriceInput (Base):
     year = Column(Integer)
     month = Column(Integer)
     day = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
 class PricePrediction(Base):
     __tablename__ = "predicted_prices"
