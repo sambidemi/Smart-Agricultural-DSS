@@ -45,13 +45,13 @@ app.add_middleware(
 )
 
 # OAuth provider configuration. Set these in environment variables for real provider integration.
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
-APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID", "")
-APPLE_TEAM_ID = os.getenv("APPLE_TEAM_ID", "")
-APPLE_KEY_ID = os.getenv("APPLE_KEY_ID", "")
-APPLE_PRIVATE_KEY = os.getenv("APPLE_PRIVATE_KEY", "")
-FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "http://127.0.0.1:5500/oauth-callback.html")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID", "").strip()
+APPLE_TEAM_ID = os.getenv("APPLE_TEAM_ID", "").strip()
+APPLE_KEY_ID = os.getenv("APPLE_KEY_ID", "").strip()
+APPLE_PRIVATE_KEY = os.getenv("APPLE_PRIVATE_KEY", "").strip()
+FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "http://127.0.0.1:5500/oauth-callback.html").strip()
 
 
 def _urlencode(data: dict) -> bytes:
@@ -263,7 +263,7 @@ def social_login(provider: str = Body(...), db: Session = Depends(get_db)):
 
 
 @app.get("/auth/google")
-def google_auth():
+def google_auth(request: Request):
     # Initiates Google OAuth flow by redirecting to Google's authorization endpoint.
     if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID.strip() == "":
         raise HTTPException(
@@ -271,9 +271,13 @@ def google_auth():
             detail="Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file. Get credentials from https://console.developers.google.com/"
         )
 
+    # Use the backend callback URL as the redirect URI so Google will send
+    # the authorization code to this server endpoint for secure token exchange.
+    redirect_uri = str(request.url_for('google_auth_callback'))
+
     params = {
         "client_id": GOOGLE_CLIENT_ID,
-        "redirect_uri": f"{FRONTEND_OAUTH_REDIRECT}/google",
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": "openid email profile",
         "access_type": "offline",
@@ -283,8 +287,28 @@ def google_auth():
     return RedirectResponse(url=auth_url)
 
 
+@app.get("/auth/google/debug")
+def google_auth_debug(request: Request):
+    """Return the Google authorization URL as JSON for debugging.
+
+    Open this in your browser and inspect the `redirect_uri` query
+    parameter to confirm it matches what's registered in Google Cloud Console.
+    """
+    redirect_uri = str(request.url_for('google_auth_callback'))
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "consent",
+    }
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+    return {"auth_url": auth_url, "redirect_uri": redirect_uri}
+
+
 @app.get("/auth/google/callback")
-def google_auth_callback(code: str, db: Session = Depends(get_db)):
+def google_auth_callback(code: str, request: Request, db: Session = Depends(get_db)):
     # Handles the OAuth callback from Google, exchanges code for tokens, and creates/updates user.
     if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET or GOOGLE_CLIENT_ID.strip() == "" or GOOGLE_CLIENT_SECRET.strip() == "":
         raise HTTPException(
@@ -293,6 +317,10 @@ def google_auth_callback(code: str, db: Session = Depends(get_db)):
         )
 
     # Exchange authorization code for access token
+    # Use the same redirect_uri value that was sent to Google when initiating
+    # the flow (the backend callback URL).
+    redirect_uri = str(request.url_for('google_auth_callback'))
+
     token_data = _http_request(
         "https://oauth2.googleapis.com/token",
         data=_urlencode({
@@ -300,7 +328,7 @@ def google_auth_callback(code: str, db: Session = Depends(get_db)):
             "client_secret": GOOGLE_CLIENT_SECRET,
             "code": code,
             "grant_type": "authorization_code",
-            "redirect_uri": f"{FRONTEND_OAUTH_REDIRECT}/google",
+            "redirect_uri": redirect_uri,
         }),
         method="POST",
     )

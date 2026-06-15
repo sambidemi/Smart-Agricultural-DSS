@@ -1,13 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# NOTE:
-# This URL is currently hardcoded for local development.
-# For production, load it from environment variables instead.
-DATABASE_URL= "postgresql://postgres:bidemi23@localhost:5432/smart_agriculture_db"
+DATABASE_URL = "postgresql://neondb_owner:npg_vjJTHyL5pW6t@ep-fragrant-star-ab0na5gx-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require"
 
-# SQLAlchemy engine and session factory used across the app.
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300,
+)
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -17,10 +17,7 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
-
 def get_db():
-    # FastAPI dependency:
-    # yields a DB session per request and always closes it after use.
     db = SessionLocal()
     try:
         yield db
