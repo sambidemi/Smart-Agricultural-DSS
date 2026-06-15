@@ -10,7 +10,7 @@ from datetime import datetime
 import joblib
 import pandas as pd
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Body, Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -30,7 +30,6 @@ load_dotenv()
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
-FRONTEND_DIR = BASE_DIR.parent / "my project"
 UPLOADS_DIR = BASE_DIR / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)
 
@@ -50,8 +49,9 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID", "")
 APPLE_TEAM_ID = os.getenv("APPLE_TEAM_ID", "")
-FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "http://127.0.0.1:8000/oauth-callback.html")
-BACKEND_BASE_URL = os.getenv("BACKEND_BASE_URL", "http://127.0.0.1:8000")
+APPLE_KEY_ID = os.getenv("APPLE_KEY_ID", "")
+APPLE_PRIVATE_KEY = os.getenv("APPLE_PRIVATE_KEY", "")
+FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "http://127.0.0.1:5500/oauth-callback.html")
 
 
 def _urlencode(data: dict) -> bytes:
@@ -73,17 +73,13 @@ def _http_request(url: str, data: bytes = None, headers: dict = None, method: st
         raise HTTPException(status_code=502, detail=f"OAuth request failed: {exc}")
 
 
-def _create_social_redirect(user: User, provider: str) -> RedirectResponse:
+def _create_social_redirect(user: User, db: Session, provider: str) -> RedirectResponse:
     access_token = create_access_token(data={"user_id": user.id})
     redirect_url = f"{FRONTEND_OAUTH_REDIRECT}?token={urllib.parse.quote(access_token)}&provider={provider}"
     return RedirectResponse(url=redirect_url)
 
 
-def _oauth_callback_url(provider: str) -> str:
-    return f"{BACKEND_BASE_URL.rstrip('/')}/auth/{provider}/callback"
-
-
-def _create_or_get_user(email: str, name: str, db: Session, profile_picture: str = None) -> User:
+def _create_or_get_user(email: str, name: str, provider: str, db: Session, profile_picture: str = None) -> User:
     if not email:
         raise HTTPException(status_code=400, detail="Social provider did not return an email address")
 
@@ -112,6 +108,22 @@ def _create_or_get_user(email: str, name: str, db: Session, profile_picture: str
     db.add(farm)
     db.commit()
     return user
+
+
+def _create_apple_client_secret() -> str:
+    if not APPLE_CLIENT_ID or not APPLE_TEAM_ID or not APPLE_KEY_ID or not APPLE_PRIVATE_KEY:
+        raise HTTPException(status_code=500, detail="Apple OAuth credentials are not configured")
+
+    private_key = APPLE_PRIVATE_KEY.replace("\\n", "\n")
+    now = int(datetime.utcnow().timestamp())
+    claims = {
+        "iss": APPLE_TEAM_ID,
+        "iat": now,
+        "exp": now + 15777000,  # six months in seconds
+        "aud": "https://appleid.apple.com",
+        "sub": APPLE_CLIENT_ID,
+    }
+    return jwt.encode(claims, private_key, algorithm="ES256", headers={"kid": APPLE_KEY_ID})
 
 
 def _decode_apple_id_token(id_token: str) -> dict:
@@ -204,6 +216,52 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
     }
 
 
+@app.post("/social-login")
+def social_login(provider: str = Body(...), db: Session = Depends(get_db)):
+    # Creates or reuses a placeholder account for social sign-in.
+    # This supports local development and allows the frontend buttons to work.
+    provider_name = provider.strip().lower()
+    if provider_name not in {"google", "apple"}:
+        raise HTTPException(status_code=400, detail="Invalid social provider")
+
+    if provider_name == "google":
+        email = "google-user@agrosense.local"
+        name = "Google User"
+    else:
+        email = "apple-user@agrosense.local"
+        name = "Apple User"
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(
+            name=name,
+            email=email,
+            password=hash_password(str(uuid4())),
+            location="Unknown",
+            phone_number="+2340000000000",
+            profile_picture=None,
+        )
+        db.add(user)
+        db.flush()
+
+        farm = FarmInfo(
+            user_id=user.id,
+            farm_type="Unknown",
+            farm_size=0.0,
+            soil_type="Unknown",
+            water_source="Unknown",
+        )
+        db.add(farm)
+        db.commit()
+
+    access_token = create_access_token(data={"user_id": user.id})
+    return {
+        "message": "Social login successful",
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+
 @app.get("/auth/google")
 def google_auth():
     # Initiates Google OAuth flow by redirecting to Google's authorization endpoint.
@@ -215,7 +273,7 @@ def google_auth():
 
     params = {
         "client_id": GOOGLE_CLIENT_ID,
-        "redirect_uri": _oauth_callback_url("google"),
+        "redirect_uri": f"{FRONTEND_OAUTH_REDIRECT}/google",
         "response_type": "code",
         "scope": "openid email profile",
         "access_type": "offline",
@@ -242,7 +300,7 @@ def google_auth_callback(code: str, db: Session = Depends(get_db)):
             "client_secret": GOOGLE_CLIENT_SECRET,
             "code": code,
             "grant_type": "authorization_code",
-            "redirect_uri": _oauth_callback_url("google"),
+            "redirect_uri": f"{FRONTEND_OAUTH_REDIRECT}/google",
         }),
         method="POST",
     )
@@ -260,11 +318,12 @@ def google_auth_callback(code: str, db: Session = Depends(get_db)):
     user = _create_or_get_user(
         email=user_info.get("email"),
         name=user_info.get("name"),
+        provider="google",
         db=db,
         profile_picture=user_info.get("picture"),
     )
 
-    return _create_social_redirect(user, "google")
+    return _create_social_redirect(user, db, "google")
 
 
 @app.get("/auth/apple")
@@ -273,12 +332,12 @@ def apple_auth():
     if not APPLE_CLIENT_ID or APPLE_CLIENT_ID.strip() == "":
         raise HTTPException(
             status_code=500,
-            detail="Apple OAuth is not configured. Please set APPLE_CLIENT_ID and APPLE_TEAM_ID in your .env file. Get credentials from https://developer.apple.com/account/"
+            detail="Apple OAuth is not configured. Please set APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, and APPLE_PRIVATE_KEY in your .env file. Get credentials from https://developer.apple.com/account/"
         )
 
     params = {
         "client_id": APPLE_CLIENT_ID,
-        "redirect_uri": _oauth_callback_url("apple"),
+        "redirect_uri": f"{FRONTEND_OAUTH_REDIRECT}/apple",
         "response_type": "code id_token",
         "scope": "name email",
         "response_mode": "form_post",
@@ -298,7 +357,7 @@ def apple_auth_callback(
     if not APPLE_CLIENT_ID or not APPLE_TEAM_ID or APPLE_CLIENT_ID.strip() == "" or APPLE_TEAM_ID.strip() == "":
         raise HTTPException(
             status_code=500,
-            detail="Apple OAuth is not configured. Please set APPLE_CLIENT_ID and APPLE_TEAM_ID in your .env file."
+            detail="Apple OAuth is not configured. Please set APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, and APPLE_PRIVATE_KEY in your .env file."
         )
 
     # Decode the ID token to get user info
@@ -324,10 +383,11 @@ def apple_auth_callback(
     user_obj = _create_or_get_user(
         email=email,
         name=name,
+        provider="apple",
         db=db,
     )
 
-    return _create_social_redirect(user_obj, "apple")
+    return _create_social_redirect(user_obj, db, "apple")
 
 
 @app.get("/dashboard")
@@ -1075,78 +1135,4 @@ async def market_analysis(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.delete("/delete-account")
-async def delete_account(
-    user_id: int = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """
-    Permanently delete a user account and all associated data.
-    This is an irreversible operation. Deletes:
-    - User profile
-    - Farm information
-    - Crop recommendations and history
-    - Price predictions and history
-    - Profile pictures from storage
-    """
-    try:
-        # Fetch the user record
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # Delete user's uploaded profile picture from filesystem if it exists
-        if user.profile_picture:
-            try:
-                picture_name = Path(user.profile_picture).name
-                picture_path = UPLOADS_DIR / picture_name
-                if picture_path.exists():
-                    picture_path.unlink()
-            except Exception:
-                pass
-
-        # Delete all related records in cascade
-        # These cascading deletes are handled by ORM if foreign keys are set up correctly
-        db.query(RecommendedCrop).filter(
-            RecommendedCrop.crop_input_id.in_(
-                db.query(CropInput.id).filter(CropInput.user_id == user_id)
-            )
-        ).delete(synchronize_session=False)
-
-        db.query(CropInput).filter(CropInput.user_id == user_id).delete(synchronize_session=False)
-
-        db.query(PricePrediction).filter(
-            PricePrediction.price_input_id.in_(
-                db.query(PriceInput.id).filter(PriceInput.user_id == user_id)
-            )
-        ).delete(synchronize_session=False)
-
-        db.query(PriceInput).filter(PriceInput.user_id == user_id).delete(synchronize_session=False)
-
-        db.query(FarmInfo).filter(FarmInfo.user_id == user_id).delete(synchronize_session=False)
-
-        # Finally, delete the user record itself
-        db.query(User).filter(User.id == user_id).delete(synchronize_session=False)
-
-        db.commit()
-
-        return {
-            "message": "Account deleted successfully",
-            "status": "deleted"
-        }
-
-    except HTTPException:
-        db.rollback()
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Error deleting account: {str(e)}")
-
-
-# Serve the static frontend from the same local server as the API.
-# Keep this mount after API routes so endpoints like /dashboard keep working.
-if FRONTEND_DIR.exists():
-    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 

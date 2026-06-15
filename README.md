@@ -61,24 +61,24 @@ To enable Google and Apple Sign-In:
    - Enable the Google+ API
    - Create OAuth 2.0 credentials
    - Add your domain to authorized origins
-   - Add authorized JavaScript origin: `http://127.0.0.1:8000`
-   - Set redirect URI to: `http://127.0.0.1:8000/auth/google/callback`
+   - Set redirect URI to: `http://127.0.0.1:5500/oauth-callback.html/google`
    - Update `.env` with your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 
 3. **Apple Sign-In Setup**:
    - Go to [Apple Developer Account](https://developer.apple.com/account/)
    - Create an App ID with Sign In with Apple capability
    - Create a Services ID for web authentication
-   - Set redirect URI to: `http://127.0.0.1:8000/auth/apple/callback`
+   - Generate a private key
+   - Set redirect URI to: `http://127.0.0.1:5500/oauth-callback.html/apple`
    - Update `.env` with your Apple credentials:
      - `APPLE_CLIENT_ID`: Your Services ID
      - `APPLE_TEAM_ID`: Your Apple Developer Team ID
+     - `APPLE_KEY_ID`: Your private key ID
+     - `APPLE_PRIVATE_KEY`: Your private key content (with \\n for line breaks)
 
 4. **Frontend Redirect URL**:
    - Update `FRONTEND_OAUTH_REDIRECT` in `.env` to match your frontend URL
-   - For local development: `http://127.0.0.1:8000/oauth-callback.html`
-   - Update `BACKEND_BASE_URL` in `.env` to match your backend URL
-   - For local development: `http://127.0.0.1:8000`
+   - For local development: `http://127.0.0.1:5500/oauth-callback.html`
 
 ### Running the Server
 
@@ -98,6 +98,7 @@ Once running, visit `http://127.0.0.1:8000/docs` for interactive API documentati
 ### Authentication
 - `POST /signup` - User registration
 - `POST /login` - User login
+- `POST /social-login` - Placeholder social login (for testing)
 - `GET /auth/google` - Initiate Google OAuth
 - `GET /auth/google/callback` - Google OAuth callback
 - `GET /auth/apple` - Initiate Apple Sign-In
@@ -160,7 +161,6 @@ For production deployment, set these environment variables:
 - `SECRET_KEY`: JWT signing key (generate a secure random string)
 - OAuth credentials as described in OAuth Setup section
 - `FRONTEND_OAUTH_REDIRECT`: Your production frontend URL
-- `BACKEND_BASE_URL`: Your production backend URL
 
 ### Docker Deployment
 

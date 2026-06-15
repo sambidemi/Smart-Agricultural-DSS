@@ -60,6 +60,31 @@ class AuthManager {
         return payload;
     }
 
+    // Sends a social login request to the backend.
+    // The backend will create or reuse a placeholder account for the provider.
+    static async socialLoginRequest(provider) {
+        const url = this.buildUrl('/social-login');
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ provider })
+        });
+
+        let payload = null;
+        try {
+            payload = await response.json();
+        } catch (error) {
+            payload = null;
+        }
+
+        if (!response.ok) {
+            throw new Error(payload?.detail || payload?.message || 'Social login failed');
+        }
+        return payload;
+    }
+
     // Initiates real OAuth flow by redirecting to the backend OAuth endpoint.
     // The backend will redirect to the provider's OAuth page.
     static initiateOAuth(provider) {

@@ -3,88 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opening AgroSense</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23238c5d' d='M54 10C34 11 20 21 14 37c-4 10 0 17 8 17 15 0 28-13 32-44zM16 49c4-3 9-7 14-12 5-5 10-12 14-20-14 5-24 14-28 24-1 3-1 6 0 8z'/%3E%3C/svg%3E">
+    <title>OAuth Callback - AgroSense</title>
     <style>
         body {
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #238c5d 0%, #2d9d6a 100%);
             margin: 0;
-            display: grid;
-            place-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            color: #2c453f;
-            background: #f6fdfa;
-        }
-
-        .fallback {
+            padding: 0;
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 0.95rem;
-            font-weight: 600;
+            justify-content: center;
         }
-
-        .loader {
-            width: 1rem;
-            height: 1rem;
-            border-radius: 999px;
-            border: 2px solid #d0ded6;
-            border-top-color: #238c5d;
-            animation: spin 0.8s linear infinite;
+        .callback-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
         }
-
+        .callback-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .callback-title {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        .callback-message {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #238c5d;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="fallback" aria-live="polite">
-        <span class="loader" aria-hidden="true"></span>
-        <span>Opening AgroSense...</span>
+    <div class="callback-container">
+        <div class="callback-icon">🌱</div>
+        <h1 class="callback-title">Signing you in...</h1>
+        <p class="callback-message">Please wait while we complete your authentication.</p>
+        <div class="spinner"></div>
     </div>
 
     <script>
-        async function handleOAuthCallback() {
+        // OAuth callback handler
+        // This page receives the JWT token from the backend OAuth flow
+        // and redirects to the dashboard with the token stored
+
+        function handleOAuthCallback() {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
-            const apiBaseUrl = window.AGROSENSE_API_BASE_URL || 'http://127.0.0.1:8000';
+            const provider = urlParams.get('provider');
 
             if (!token) {
-                window.location.replace('login.html');
+                console.error('No token received from OAuth callback');
+                window.location.href = 'index.html?auth=login';
                 return;
             }
 
-            localStorage.setItem('agrosense_token', token);
-            localStorage.setItem('agrosense_user', JSON.stringify({
-                fullName: 'Farmer',
-                email: '',
-                location: '',
-                phone: 'Not provided',
-                farmType: '',
-                farmSize: '',
-                soilType: '',
-                waterSource: 'Rain-fed',
-                accountStatus: 'Active',
-                avatar: null
-            }));
+            // Store the auth state using the same logic as AuthManager
+            const apiBaseUrl = window.AGROSENSE_API_BASE_URL || 'http://127.0.0.1:8000';
 
-            try {
-                const response = await fetch(`${apiBaseUrl}/dashboard`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
+            // Fetch user profile to get full auth state
+            fetch(`${apiBaseUrl}/dashboard`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch user profile');
                 }
-
-                const dashboardData = await response.json();
-
+                return response.json();
+            })
+            .then(dashboardData => {
+                // Save auth state to localStorage
+                localStorage.setItem('agrosense_token', token);
                 localStorage.setItem('agrosense_user', JSON.stringify({
                     fullName: dashboardData?.user?.name || '',
                     email: dashboardData?.user?.email || '',
@@ -101,13 +111,29 @@
                             : `${apiBaseUrl}${dashboardData.user.profile_picture}`)
                         : null
                 }));
-            } catch (error) {
-                console.warn('OAuth profile fetch failed; dashboard will retry:', error);
-            }
 
-            window.location.replace('dashboard.html');
+                // Show success message and redirect
+                document.querySelector('.callback-title').textContent = 'Success!';
+                document.querySelector('.callback-message').textContent = `Signed in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`;
+                document.querySelector('.spinner').style.display = 'none';
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('OAuth callback error:', error);
+                document.querySelector('.callback-title').textContent = 'Authentication Failed';
+                document.querySelector('.callback-message').textContent = 'There was an error completing your sign-in. Please try again.';
+                document.querySelector('.spinner').style.display = 'none';
+
+                setTimeout(() => {
+                    window.location.href = 'index.html?auth=login';
+                }, 3000);
+            });
         }
 
+        // Handle the callback when the page loads
         document.addEventListener('DOMContentLoaded', handleOAuthCallback);
     </script>
 </body>
