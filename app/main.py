@@ -22,7 +22,7 @@ from .auth import hash_password, verify_password
 from .database import get_db, engine
 from .models import CropInput, FarmInfo, RecommendedCrop, User, PriceInput, PricePrediction
 from .schemas import ProfileUpdate, cropfeatures, pricefeatures, marketanalysisfeatures
-from .token import create_access_token, get_current_user
+from .token_utils import create_access_token, get_current_user
 
 # Load environment variables from .env file if it exists
 load_dotenv()
