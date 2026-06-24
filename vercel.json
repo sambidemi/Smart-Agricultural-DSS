@@ -8,7 +8,7 @@
     }
   ],
   "functions": {
-    "api/index.py": {
+    "api/**/*.py": {
       "maxDuration": 30,
       "excludeFiles": "{my project/**,uploads/**,app/uploads/**,**/__pycache__/**,*.pyc,render.yaml}"
     }
