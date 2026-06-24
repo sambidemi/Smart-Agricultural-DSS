@@ -2,7 +2,7 @@
 class DashboardManager {
     constructor() {
         // Deployment switch: set window.AGROSENSE_API_BASE_URL before this file loads.
-        this.apiBaseUrl = window.AGROSENSE_API_BASE_URL || 'http://127.0.0.1:8000';
+        this.apiBaseUrl = window.AGROSENSE_API_BASE_URL || 'https://smart-agricultural-dss-production.up.railway.app';
         this.token = localStorage.getItem('agrosense_token');
         this.userData = this.loadUserData();
         this.dynamicMessageIndex = 0;

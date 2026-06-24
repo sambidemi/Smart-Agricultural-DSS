@@ -77,7 +77,7 @@
             }
 
             // Store the auth state using the same logic as AuthManager
-            const apiBaseUrl = window.AGROSENSE_API_BASE_URL || 'http://127.0.0.1:8000';
+            const apiBaseUrl = window.AGROSENSE_API_BASE_URL || 'https://smart-agricultural-dss-production.up.railway.app';
 
             // Fetch user profile to get full auth state
             fetch(`${apiBaseUrl}/dashboard`, {
