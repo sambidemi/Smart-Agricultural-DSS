@@ -30,7 +30,7 @@ load_dotenv()
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
-UPLOADS_DIR = BASE_DIR / "uploads"
+UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/tmp/agrosense_uploads" if os.getenv("VERCEL") else BASE_DIR / "uploads"))
 UPLOADS_DIR.mkdir(exist_ok=True)
 
 # CORS allows browser-based frontend apps (different origin) to call this API.
@@ -52,6 +52,15 @@ APPLE_TEAM_ID = os.getenv("APPLE_TEAM_ID", "").strip()
 APPLE_KEY_ID = os.getenv("APPLE_KEY_ID", "").strip()
 APPLE_PRIVATE_KEY = os.getenv("APPLE_PRIVATE_KEY", "").strip()
 FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "http://127.0.0.1:5500/oauth-callback.html").strip()
+
+
+@app.get("/")
+def health_check():
+    return {
+        "message": "AgroSense backend API is running",
+        "status": "ok",
+        "docs": "/docs",
+    }
 
 
 def _urlencode(data: dict) -> bytes:

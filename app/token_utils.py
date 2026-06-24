@@ -1,10 +1,11 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+import os
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 # JWT settings used for issuing and validating login tokens.
-SECRET_KEY = "your_secret_key"
+SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
