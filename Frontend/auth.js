@@ -4,7 +4,7 @@ class AuthManager {
     // Replace the fallback URL below with your deployed backend URL, e.g.:
     // static API_BASE_URL = 'https://your-api-domain.com';
     // You can also set window.AGROSENSE_API_BASE_URL before auth.js loads.
-    static API_BASE_URL = window.AGROSENSE_API_BASE_URL || 'https://smart-agricultural-dss-production.up.railway.app';
+    static API_BASE_URL = window.AGROSENSE_API_BASE_URL || 'https://smart-agricultural-dss-production-5dd9.up.railway.app';
 
     static buildUrl(path, query = {}) {
         const url = new URL(path, this.API_BASE_URL);
