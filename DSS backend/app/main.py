@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from jose import jwt
 
 from .auth import hash_password, verify_password
-from .database import get_db, engine
+from .database import get_db, engine, init_db
 from .models import CropInput, FarmInfo, RecommendedCrop, User, PriceInput, PricePrediction
 from .schemas import ProfileUpdate, cropfeatures, pricefeatures, marketanalysisfeatures
 from .token_utils import create_access_token, get_current_user
@@ -30,7 +30,7 @@ load_dotenv()
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
-UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", "/tmp/agrosense_uploads" if os.getenv("VERCEL") else BASE_DIR / "uploads"))
+UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", BASE_DIR / "uploads"))
 UPLOADS_DIR.mkdir(exist_ok=True)
 
 # CORS allows browser-based frontend apps (different origin) to call this API.
@@ -140,6 +140,11 @@ def _decode_apple_id_token(id_token: str) -> dict:
 
 # Expose uploaded profile images as static files under /uploads/*
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
+
+@app.on_event("startup")
+def create_database_tables():
+    init_db()
 
 
 @app.on_event("startup")
