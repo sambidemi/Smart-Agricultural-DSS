@@ -358,16 +358,7 @@ body {
     visibility: hidden;
     transition: opacity var(--transition-base), visibility var(--transition-base);
     z-index: calc(var(--z-fixed) - 1);
-}
-
-.sidebar-backdrop.show {
-    display: block;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-
-.content-page {
+        pointer-events: none;
     display: none;
     animation: fadeInUp 0.45s ease;
 }
