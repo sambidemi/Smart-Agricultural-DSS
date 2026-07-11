@@ -359,6 +359,7 @@ body {
     transition: opacity var(--transition-base), visibility var(--transition-base);
     z-index: calc(var(--z-fixed) - 1);
     cursor: pointer;
+    pointer-events: none;
 }
 
 .sidebar-backdrop.show {
