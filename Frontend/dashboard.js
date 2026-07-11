@@ -1418,6 +1418,11 @@ class DashboardManager {
         if (sidebar && sidebar.classList.contains('open')) {
             sidebar.classList.remove('open');
         }
+
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        if (sidebarBackdrop && sidebarBackdrop.classList.contains('show')) {
+            sidebarBackdrop.classList.remove('show');
+        }
     }
 
     renderRecommendationHistoryCard(cardData, options = {}) {
