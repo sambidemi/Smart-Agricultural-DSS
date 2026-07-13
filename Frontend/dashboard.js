@@ -204,13 +204,54 @@ class DashboardManager {
         }
     }
 
+    bindTapHandler(element, handler) {
+        if (!element) return;
+
+        let suppressClick = false;
+        const invoke = (event) => {
+            if (event.type === 'touchend' || event.type === 'pointerup') {
+                if (suppressClick) {
+                    suppressClick = false;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+
+                suppressClick = true;
+                setTimeout(() => {
+                    suppressClick = false;
+                }, 260);
+                event.preventDefault();
+                event.stopPropagation();
+                handler(event);
+                return;
+            }
+
+            if (suppressClick) {
+                suppressClick = false;
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+
+            handler(event);
+        };
+
+        element.addEventListener('click', invoke);
+        if ('PointerEvent' in window) {
+            element.addEventListener('pointerup', invoke, { passive: false });
+        } else if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            element.addEventListener('touchend', invoke, { passive: false });
+        }
+    }
+
     bindEvents() {
         if (this.uploadBtn) {
-            this.uploadBtn.addEventListener('click', () => this.avatarInput.click());
+            this.bindTapHandler(this.uploadBtn, () => this.avatarInput.click());
             this.avatarInput.addEventListener('change', (e) => this.uploadAvatar(e));
         }
         if (this.uploadBtnForm) {
-            this.uploadBtnForm.addEventListener('click', () => this.avatarInputForm.click());
+            this.bindTapHandler(this.uploadBtnForm, () => this.avatarInputForm.click());
             this.avatarInputForm.addEventListener('change', (e) => this.uploadAvatar(e));
         }
 
@@ -219,7 +260,7 @@ class DashboardManager {
         }
 
         if (this.deleteAccountBtn) {
-            this.deleteAccountBtn.addEventListener('click', () => this.openDeleteModal());
+            this.bindTapHandler(this.deleteAccountBtn, () => this.openDeleteModal());
         }
         if (this.deleteModalBackdrop) {
             this.deleteModalBackdrop.addEventListener('click', () => this.closeDeleteModal());
@@ -232,7 +273,7 @@ class DashboardManager {
         }
 
         if (this.startRecommendationBtn) {
-            this.startRecommendationBtn.addEventListener('click', () => this.openRecommendationModal());
+            this.bindTapHandler(this.startRecommendationBtn, () => this.openRecommendationModal());
         }
         if (this.recommendModalClose) {
             this.recommendModalClose.addEventListener('click', () => this.closeRecommendationModal());
@@ -245,7 +286,7 @@ class DashboardManager {
         }
 
         if (this.startPredictionBtn) {
-            this.startPredictionBtn.addEventListener('click', () => this.openPredictionModal());
+            this.bindTapHandler(this.startPredictionBtn, () => this.openPredictionModal());
         }
         if (this.predictModalClose) {
             this.predictModalClose.addEventListener('click', () => this.closePredictionModal());
@@ -289,16 +330,16 @@ class DashboardManager {
 
         // Supports both sidebar links and dropdown profile item.
         document.querySelectorAll('[data-page]').forEach(link => {
-            link.addEventListener('click', (e) => this.navigate(e));
+            this.bindTapHandler(link, (e) => this.navigate(e));
         });
 
         document.querySelectorAll('.quick-action-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleAction(e));
+            this.bindTapHandler(btn, (e) => this.handleAction(e));
         });
 
         const logoutBtns = document.querySelectorAll('#logoutBtn, #dropdownLogout');
         logoutBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.logout(e));
+            this.bindTapHandler(btn, (e) => this.logout(e));
         });
 
         window.addEventListener('beforeunload', () => {
@@ -1552,7 +1593,7 @@ class DashboardManager {
         };
 
         if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
+            this.bindTapHandler(menuToggle, () => {
                 if (sidebar.classList.contains('open')) {
                     closeSidebar();
                 } else {
@@ -1562,19 +1603,19 @@ class DashboardManager {
         }
 
         if (sidebarClose) {
-            sidebarClose.addEventListener('click', () => {
+            this.bindTapHandler(sidebarClose, () => {
                 closeSidebar();
             });
         }
 
         if (sidebarBackdrop) {
-            sidebarBackdrop.addEventListener('click', () => {
+            this.bindTapHandler(sidebarBackdrop, () => {
                 closeSidebar();
             });
         }
 
         document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('open')) {
+            if (!sidebar.contains(e.target) && !menuToggle?.contains(e.target) && sidebar.classList.contains('open')) {
                 closeSidebar();
             }
         }, true);

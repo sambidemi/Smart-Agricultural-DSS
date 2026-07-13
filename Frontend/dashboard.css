@@ -157,6 +157,8 @@ body {
     transition: background var(--transition-base), color var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-fast);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 
 .nav-link i {
@@ -242,6 +244,8 @@ body {
     transition: transform var(--transition-fast), background var(--transition-fast);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 
 .menu-toggle:hover {
@@ -366,7 +370,7 @@ body {
     display: block;
     opacity: 1;
     visibility: visible;
-    pointer-events: auto;
+    pointer-events: none;
 }
 
     .content-page {
@@ -729,6 +733,8 @@ body {
     white-space: normal;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 
 .quick-action-btn span {
