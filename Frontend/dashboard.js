@@ -209,24 +209,6 @@ class DashboardManager {
 
         let suppressClick = false;
         const invoke = (event) => {
-            if (event.type === 'touchend' || event.type === 'pointerup') {
-                if (suppressClick) {
-                    suppressClick = false;
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return;
-                }
-
-                suppressClick = true;
-                setTimeout(() => {
-                    suppressClick = false;
-                }, 260);
-                event.preventDefault();
-                event.stopPropagation();
-                handler(event);
-                return;
-            }
-
             if (suppressClick) {
                 suppressClick = false;
                 event.preventDefault();
@@ -234,14 +216,22 @@ class DashboardManager {
                 return;
             }
 
+            if (event.type === 'touchstart' || event.type === 'mousedown') {
+                suppressClick = true;
+                event.preventDefault();
+                event.stopPropagation();
+                handler(event);
+                return;
+            }
+
             handler(event);
         };
 
         element.addEventListener('click', invoke);
-        if ('PointerEvent' in window) {
-            element.addEventListener('pointerup', invoke, { passive: false });
-        } else if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            element.addEventListener('touchend', invoke, { passive: false });
+        element.addEventListener('mousedown', invoke, { passive: false });
+
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            element.addEventListener('touchstart', invoke, { passive: false });
         }
     }
 

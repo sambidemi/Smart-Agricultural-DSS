@@ -160,6 +160,8 @@ body {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
+    position: relative;
+    z-index: 2;
 }
 
 .nav-link i {
@@ -247,6 +249,8 @@ body {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
+    position: relative;
+    z-index: 2;
 }
 
 .menu-toggle:hover {
@@ -736,6 +740,8 @@ body {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
+    position: relative;
+    z-index: 2;
 }
 
 .quick-action-btn span {
