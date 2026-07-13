@@ -6,6 +6,7 @@ body {
         radial-gradient(circle at top right, rgba(43, 156, 108, 0.09), transparent 34%),
         linear-gradient(135deg, #f6fdfa 0%, #e8f3ef 100%);
     color: var(--dark-900);
+    overflow-x: hidden;
 }
 
 .dashboard-wrapper {
@@ -370,7 +371,7 @@ body {
     display: block;
     opacity: 1;
     visibility: visible;
-    pointer-events: none;
+    pointer-events: auto;
 }
 
     .content-page {
@@ -1878,6 +1879,7 @@ body {
 
 @media (max-width: 1024px) {
     .sidebar {
+        width: min(86vw, 320px);
         transform: translateX(-100%);
     }
 
@@ -1885,8 +1887,13 @@ body {
         transform: translateX(0);
     }
 
+    .dashboard-wrapper {
+        min-height: 100svh;
+    }
+
     .dashboard-main {
         margin-left: 0;
+        min-height: 100svh;
     }
 
     .menu-toggle {
@@ -1904,11 +1911,11 @@ body {
     }
 
     .dashboard-header {
-        padding: 1rem 1.2rem;
+        padding: 0.95rem 1rem;
     }
 
     .dashboard-content {
-        padding: 1rem 1.2rem 1.6rem;
+        padding: 1rem 1rem 1.4rem;
     }
 
     .profile-card {
@@ -1943,19 +1950,37 @@ body {
 @media (max-width: 768px) {
     .dashboard-header {
         gap: 0.8rem;
+        padding: 0.9rem 0.95rem;
     }
 
     .user-details {
         display: none;
     }
 
+    .dashboard-content {
+        padding: 0.9rem 0.9rem 1.1rem;
+    }
+
+    .welcome-section,
+    .profile-card,
+    .market-analysis-hero,
+    .market-analysis-filter-card,
+    .history-hero,
+    .history-panel,
+    .placeholder-page,
+    .profile-edit-container,
+    .recommendation-card,
+    .prediction-card {
+        border-radius: 1.1rem;
+    }
+
     .welcome-section {
-        padding: 1.2rem;
+        padding: 1.15rem;
     }
 
     .welcome-title {
         max-width: none;
-        font-size: 1.8rem;
+        font-size: 1.75rem;
     }
 
     .welcome-top {
@@ -1980,6 +2005,10 @@ body {
         grid-template-columns: 1fr;
         text-align: center;
         justify-items: center;
+    }
+
+    .nav-link {
+        padding: 0.84rem 0.95rem;
     }
 
     .recommend-form-grid,
@@ -2121,12 +2150,30 @@ body {
 }
 
 @media (max-width: 560px) {
+    .sidebar {
+        width: 88vw;
+    }
+
     .dashboard-header {
         flex-wrap: wrap;
+        padding: 0.85rem 0.85rem 0.95rem;
     }
 
     .dashboard-content {
-        padding: 0.9rem;
+        padding: 0.8rem;
+    }
+
+    .sidebar-logo {
+        font-size: 1.15rem;
+    }
+
+    .sidebar-nav {
+        padding: 1rem 0.75rem;
+    }
+
+    .nav-link {
+        padding: 0.78rem 0.8rem;
+        font-size: 0.95rem;
     }
 
     .welcome-section,
