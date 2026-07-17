@@ -1810,6 +1810,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    pointer-events: none;
 }
 
 .toast {
@@ -1825,6 +1826,7 @@ body {
     min-width: 280px;
     animation: slideIn 0.3s ease;
     backdrop-filter: blur(16px);
+    pointer-events: auto;
 }
 
 .toast.success {
