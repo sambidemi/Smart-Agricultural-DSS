@@ -938,29 +938,36 @@ def get_latest_price_prediction(
         month_num = None
         stored_month = price_input.month
 
-        # Case 1: month already stored as calendar month number (1-12).
+        # Case 1: month already stored as a calendar month number (1-12).
         if isinstance(stored_month, int) and 1 <= stored_month <= 12:
             month_num = stored_month
             month_label = datetime(2000, month_num, 1).strftime("%B")
+        elif isinstance(stored_month, int) and 0 <= stored_month <= 11:
+            # Case 2: month stored as a 0-based encoder index.
+            month_num = stored_month + 1
+            month_label = datetime(2000, month_num, 1).strftime("%B")
         else:
-            # Case 2: month stored as encoder index.
+            # Case 3: month stored as encoder index or a string label.
             try:
                 decoded_month = month_encoder.inverse_transform([stored_month])[0]
                 month_label = str(decoded_month)
                 month_num = month_to_num.get(month_label.strip().lower())
             except Exception:
-                # Case 3: fallback to parseable numeric/string month values.
+                # Case 4: fallback to parseable numeric/string month values.
                 try:
                     maybe_month_num = int(stored_month)
                     if 1 <= maybe_month_num <= 12:
                         month_num = maybe_month_num
+                        month_label = datetime(2000, month_num, 1).strftime("%B")
+                    elif 0 <= maybe_month_num <= 11:
+                        month_num = maybe_month_num + 1
                         month_label = datetime(2000, month_num, 1).strftime("%B")
                 except Exception:
                     month_label = str(stored_month)
                     month_num = month_to_num.get(month_label.strip().lower())
 
         date_value = None
-        if month_num and price_input.day and price_input.year:
+        if month_num is not None and price_input.day is not None and price_input.year is not None:
             try:
                 date_value = datetime(price_input.year, month_num, price_input.day).strftime("%Y-%m-%d")
             except Exception:
@@ -1032,6 +1039,9 @@ def get_price_prediction_history(
             if isinstance(stored_month, int) and 1 <= stored_month <= 12:
                 month_num = stored_month
                 month_label = datetime(2000, month_num, 1).strftime("%B")
+            elif isinstance(stored_month, int) and 0 <= stored_month <= 11:
+                month_num = stored_month + 1
+                month_label = datetime(2000, month_num, 1).strftime("%B")
             else:
                 try:
                     decoded_month = month_encoder.inverse_transform([stored_month])[0]
@@ -1043,12 +1053,15 @@ def get_price_prediction_history(
                         if 1 <= maybe_month_num <= 12:
                             month_num = maybe_month_num
                             month_label = datetime(2000, month_num, 1).strftime("%B")
+                        elif 0 <= maybe_month_num <= 11:
+                            month_num = maybe_month_num + 1
+                            month_label = datetime(2000, month_num, 1).strftime("%B")
                     except Exception:
                         month_label = str(stored_month)
                         month_num = month_to_num.get(month_label.strip().lower())
 
             date_value = None
-            if month_num and price_input.day and price_input.year:
+            if month_num is not None and price_input.day is not None and price_input.year is not None:
                 try:
                     date_value = datetime(price_input.year, month_num, price_input.day).strftime("%Y-%m-%d")
                 except Exception:

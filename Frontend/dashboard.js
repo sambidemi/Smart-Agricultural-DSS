@@ -685,22 +685,25 @@ class DashboardManager {
     }
 
     buildIsoDateFromParts(year, month, day) {
-        if (!year || !month || !day) return '';
+        if (year === null || year === undefined || year === '' || month === null || month === undefined || month === '' || day === null || day === undefined || day === '') return '';
 
         const monthLookup = {
             january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
             july: 7, august: 8, september: 9, october: 10, november: 11, december: 12
         };
 
-        let monthNum = Number(month);
-        if (!Number.isFinite(monthNum) || monthNum < 1 || monthNum > 12) {
-            monthNum = monthLookup[String(month).trim().toLowerCase()] || NaN;
-        }
-        if (!Number.isFinite(monthNum)) return '';
-
         const yyyy = Number(year);
         const dd = Number(day);
         if (!Number.isFinite(yyyy) || !Number.isFinite(dd)) return '';
+
+        let monthNum = Number(month);
+        if (!Number.isFinite(monthNum)) {
+            monthNum = monthLookup[String(month).trim().toLowerCase()] || NaN;
+        } else if (monthNum >= 0 && monthNum <= 11) {
+            monthNum += 1;
+        }
+
+        if (!Number.isFinite(monthNum) || monthNum < 1 || monthNum > 12) return '';
 
         const mmText = String(monthNum).padStart(2, '0');
         const ddText = String(dd).padStart(2, '0');
