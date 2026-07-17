@@ -300,6 +300,7 @@ def google_auth(request: Request):
     # Use the backend callback URL as the redirect URI so Google will send
     # the authorization code to this server endpoint for secure token exchange.
     redirect_uri = str(request.url_for("google_auth_callback"))
+    redirect_uri = redirect_uri.replace("http://", "https://", 1)
 
     params = {
         "client_id": GOOGLE_CLIENT_ID,
@@ -346,9 +347,8 @@ def google_auth_callback(code: str, request: Request, db: Session = Depends(get_
     # Exchange authorization code for access token
     # Use the same redirect_uri value that was sent to Google when initiating
     # the flow (the backend callback URL).
-    redirect_uri = str(
-    request.url_for("google_auth_callback").replace(scheme="https")
-)
+    redirect_uri = str(request.url_for("google_auth_callback"))
+    redirect_uri = redirect_uri.replace("http://", "https://", 1)
 
     token_data = _http_request(
         "https://oauth2.googleapis.com/token",
