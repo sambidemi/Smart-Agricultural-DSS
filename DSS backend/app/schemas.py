@@ -2,8 +2,10 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+# Pydantic schemas define the expected request payloads
+# and validate user input for API endpoints.
 # Input schema for ML crop recommendation.
-class cropfeatures (BaseModel):
+class cropfeatures(BaseModel):
     nitrogen: float = Field(..., example = 50.0)
     phosphorus: float = Field(..., example = 30.0)
     potassium: float = Field(..., example = 20.0)
@@ -25,7 +27,8 @@ class ProfileUpdate(BaseModel):
     soil_type: Optional[str] = None
     water_source: Optional[str] = None
 
-    # Enforce Nigerian international phone format: +234XXXXXXXXXX
+    # Validate and normalize phone number input before updating the database.
+    # This ensures the backend only accepts the expected +234 format.
     @field_validator("phone_number")
     @classmethod
     def validate_phone_number(cls, value: Optional[str]) -> Optional[str]:

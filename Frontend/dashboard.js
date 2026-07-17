@@ -1,4 +1,13 @@
 /* dashboard.js - Dashboard Functionality */
+/*
+  DashboardManager handles the authenticated dashboard experience:
+  - profile sync
+  - crop recommendation calls
+  - price prediction calls
+  - market analysis
+  - history pages
+  - user session and localStorage state
+*/
 class DashboardManager {
     constructor() {
         // Deployment switch: set window.AGROSENSE_API_BASE_URL before this file loads.
@@ -14,6 +23,7 @@ class DashboardManager {
     }
 
     init() {
+        // Initialize dashboard state and guard route access.
         this.cacheElements();
         if (!this.ensureAuthenticatedSession()) return;
         this.initPricePredictionModule();
@@ -382,6 +392,7 @@ class DashboardManager {
 
     // Prevent unauthenticated users from seeing dashboard content.
     ensureAuthenticatedSession() {
+        // Redirect users to login if there is no stored auth token.
         if (!this.token) {
             this.redirectToLogin();
             return false;
@@ -397,6 +408,7 @@ class DashboardManager {
 
     // GET /dashboard -> hydrate both summary cards and profile settings form.
     async refreshProfileFromApi() {
+        // Load fresh profile information from the backend and refresh local state.
         try {
             if (!this.token) return;
             const payload = await this.request('/dashboard', { method: 'GET' });
@@ -1327,6 +1339,7 @@ class DashboardManager {
 
     // POST /upload-profile-picture
     async uploadAvatar(event) {
+        // Handle file selection and upload the user avatar image to the backend.
         const file = event.target.files[0];
         if (!file) return;
 
@@ -1632,6 +1645,8 @@ class DashboardManager {
     }
 
     async request(path, options = {}) {
+        // Generic authenticated request helper for dashboard API calls.
+        // It attaches the stored JWT token and handles 401 session expiration.
         if (!this.token) {
             this.redirectToLogin();
             throw new Error('Session expired. Please login again.');

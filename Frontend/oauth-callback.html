@@ -61,9 +61,10 @@
     </div>
 
     <script>
-        // OAuth callback handler
-        // This page receives the JWT token from the backend OAuth flow
-        // and redirects to the dashboard with the token stored
+        // OAuth callback handler page.
+        // When the backend redirects here after successful sign-in,
+        // this script reads the token, loads the user profile, and stores
+        // auth data in localStorage before taking the user to the dashboard.
 
         function handleOAuthCallback() {
             const urlParams = new URLSearchParams(window.location.search);

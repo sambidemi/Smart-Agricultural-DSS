@@ -1,4 +1,8 @@
 /* auth.js - Authentication Logic for AgroSense */
+/*
+  AuthManager handles user login, signup, social OAuth redirection,
+  and persistence of authentication state in localStorage.
+*/
 class AuthManager {
     // Production switch:
     // Replace the fallback URL below with your deployed backend URL, e.g.:
@@ -7,6 +11,8 @@ class AuthManager {
     static API_BASE_URL = window.AGROSENSE_API_BASE_URL || 'https://smart-agricultural-dss-production-5dd9.up.railway.app';
 
     static buildUrl(path, query = {}) {
+        // Build the full backend URL for API requests,
+        // optionally appending query string parameters.
         const url = new URL(path, this.API_BASE_URL);
         Object.entries(query).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
@@ -17,6 +23,8 @@ class AuthManager {
     }
 
     static async request(path, options = {}) {
+        // Generic helper for JSON API calls.
+        // Returns parsed JSON or throws a friendly Error message.
         const response = await fetch(this.buildUrl(path), {
             ...options,
             headers: {
@@ -41,6 +49,7 @@ class AuthManager {
     }
 
     static async loginRequest(email, password) {
+        // Send login credentials to the backend login endpoint.
         const url = this.buildUrl('/login', { email, password });
         const response = await fetch(url, { method: 'POST' });
         const payload = await response.json();
@@ -51,6 +60,7 @@ class AuthManager {
     }
 
     static async signupRequest(data) {
+        // Send signup form values to the backend signup endpoint.
         const url = this.buildUrl('/signup', data);
         const response = await fetch(url, { method: 'POST' });
         const payload = await response.json();
@@ -107,6 +117,8 @@ class AuthManager {
     }
 
     static saveAuthState({ token, user, farmInfo }) {
+        // Save the logged-in user's token and profile details to localStorage.
+        // The dashboard reads this stored state on page load.
         const avatarUrl = user?.profile_picture
             ? (String(user.profile_picture).startsWith('http')
                 ? user.profile_picture
@@ -129,6 +141,7 @@ class AuthManager {
     }
 
     static initLogin() {
+        // Initialize login page behaviors and wire up form event handlers.
         const form = document.getElementById('loginForm');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
@@ -145,6 +158,7 @@ class AuthManager {
     }
 
     static initSignup() {
+        // Initialize signup page behaviors, including the two-step wizard controls.
         const form = document.getElementById('signupForm');
         const passwordInput = document.getElementById('signup-password');
         const submitBtn = document.getElementById('signupBtnSubmit');
@@ -307,6 +321,7 @@ class AuthManager {
     static async handleSocialAuth(provider) {
         try {
             // For real OAuth, redirect to the backend OAuth endpoint
+            // The backend will handle provider login and return a JWT token.
             this.initiateOAuth(provider);
         } catch (error) {
             if (error.message === 'Failed to fetch') {
@@ -379,6 +394,7 @@ class AuthManager {
     }
 
     static async handleLogin(e, emailInput, passwordInput, submitBtn) {
+        // Validate login form and then submit credentials.
         e.preventDefault();
         
         // Clear previous errors
@@ -440,6 +456,7 @@ class AuthManager {
     }
 
     static async handleSignup(e, submitBtn) {
+        // Validate signup form step two and submit the account creation request.
         e.preventDefault();
         
         const fields = {

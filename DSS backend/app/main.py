@@ -27,7 +27,8 @@ from .token_utils import create_access_token, get_current_user
 # Load environment variables from .env file if it exists
 load_dotenv()
 
-
+# Create FastAPI application instance and configure uploads directory.
+# UPLOADS_DIR stores user-uploaded profile images for later delivery through /uploads.
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
 UPLOADS_DIR = Path(os.getenv("UPLOADS_DIR", BASE_DIR / "uploads"))
@@ -51,7 +52,7 @@ APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID", "").strip()
 APPLE_TEAM_ID = os.getenv("APPLE_TEAM_ID", "").strip()
 APPLE_KEY_ID = os.getenv("APPLE_KEY_ID", "").strip()
 APPLE_PRIVATE_KEY = os.getenv("APPLE_PRIVATE_KEY", "").strip()
-FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "http://127.0.0.1:5500/oauth-callback.html").strip()
+FRONTEND_OAUTH_REDIRECT = os.getenv("FRONTEND_OAUTH_REDIRECT", "https://agrosense-smart-agricultural-dss.vercel.app/oauth-callback.html").strip()
 
 
 @app.get("/")
@@ -64,10 +65,13 @@ def health_check():
 
 
 def _urlencode(data: dict) -> bytes:
+    # Prepare form-encoded body for OAuth token exchanges.
     return urllib.parse.urlencode(data).encode()
 
 
 def _http_request(url: str, data: bytes = None, headers: dict = None, method: str = "GET") -> dict:
+    # Perform a basic HTTP request and parse a JSON response.
+    # Used for communicating with external OAuth providers.
     request = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
     try:
         with urllib.request.urlopen(request, timeout=20) as response:
@@ -83,12 +87,15 @@ def _http_request(url: str, data: bytes = None, headers: dict = None, method: st
 
 
 def _create_social_redirect(user: User, db: Session, provider: str) -> RedirectResponse:
+    # Generate a JWT token for the authenticated user and redirect back to frontend.
     access_token = create_access_token(data={"user_id": user.id})
     redirect_url = f"{FRONTEND_OAUTH_REDIRECT}?token={urllib.parse.quote(access_token)}&provider={provider}"
     return RedirectResponse(url=redirect_url)
 
 
 def _create_or_get_user(email: str, name: str, provider: str, db: Session, profile_picture: str = None) -> User:
+    # Find an existing user by email or create a new account from social login details.
+    # This lets the backend reuse accounts if a social email already exists.
     if not email:
         raise HTTPException(status_code=400, detail="Social provider did not return an email address")
 
@@ -120,6 +127,7 @@ def _create_or_get_user(email: str, name: str, provider: str, db: Session, profi
 
 
 def _create_apple_client_secret() -> str:
+    # Build a JWT client secret for Apple Sign-In.
     if not APPLE_CLIENT_ID or not APPLE_TEAM_ID or not APPLE_KEY_ID or not APPLE_PRIVATE_KEY:
         raise HTTPException(status_code=500, detail="Apple OAuth credentials are not configured")
 
@@ -136,6 +144,8 @@ def _create_apple_client_secret() -> str:
 
 
 def _decode_apple_id_token(id_token: str) -> dict:
+    # Decode Apple ID token payload without verifying signature in this basic implementation.
+    # Note: this is not secure enough for production because signature verification is skipped.
     return jwt.decode(id_token, key="", algorithms=["RS256"], options={"verify_signature": False})
 
 # Expose uploaded profile images as static files under /uploads/*
@@ -171,7 +181,7 @@ def signup(
     water_source: str,
     db: Session = Depends(get_db),
 ):
-    # Creates user + farm record in one DB transaction.
+    # Create a new user account and farm profile entry in a single transaction.
     try:
         existing_user = db.query(User).filter(User.email == email).first()
         if existing_user:
@@ -214,7 +224,7 @@ def signup(
 
 @app.post("/login")
 def login(email: str, password: str, db: Session = Depends(get_db)):
-    # Verifies credentials and returns a JWT for protected endpoints.
+    # Verify user credentials and return a signed JWT access token.
     user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(status_code=400, detail="User not found")
@@ -233,6 +243,7 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
 @app.post("/social-login")
 def social_login(provider: str = Body(...), db: Session = Depends(get_db)):
     # Creates or reuses a placeholder account for social sign-in.
+    # Useful for testing OAuth button behavior without full provider setup.
     # This supports local development and allows the frontend buttons to work.
     provider_name = provider.strip().lower()
     if provider_name not in {"google", "apple"}:
@@ -279,6 +290,7 @@ def social_login(provider: str = Body(...), db: Session = Depends(get_db)):
 @app.get("/auth/google")
 def google_auth(request: Request):
     # Initiates Google OAuth flow by redirecting to Google's authorization endpoint.
+    # The user will be sent to Google, then redirected back to /auth/google/callback.
     if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID.strip() == "":
         raise HTTPException(
             status_code=500,
@@ -323,7 +335,8 @@ def google_auth_debug(request: Request):
 
 @app.get("/auth/google/callback")
 def google_auth_callback(code: str, request: Request, db: Session = Depends(get_db)):
-    # Handles the OAuth callback from Google, exchanges code for tokens, and creates/updates user.
+    # Handles the OAuth callback from Google, exchanges the authorization code for access tokens,
+    # retrieves Google user info, and creates or updates the corresponding local user record.
     if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET or GOOGLE_CLIENT_ID.strip() == "" or GOOGLE_CLIENT_SECRET.strip() == "":
         raise HTTPException(
             status_code=500,
@@ -371,6 +384,7 @@ def google_auth_callback(code: str, request: Request, db: Session = Depends(get_
 @app.get("/auth/apple")
 def apple_auth():
     # Initiates Apple Sign-In flow by redirecting to Apple's authorization endpoint.
+    # The backend constructs the Apple authorization URL and sends the browser to it.
     if not APPLE_CLIENT_ID or APPLE_CLIENT_ID.strip() == "":
         raise HTTPException(
             status_code=500,
@@ -437,7 +451,7 @@ def get_user_details(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    # Returns combined user + farm profile payload used by frontend dashboard.
+    # Return the authenticated user's profile details and farm information.
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -515,7 +529,8 @@ async def recommend_crop(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user),
 ):
-    # Predict agro zone + recommended crop, then persist request/output history.
+    # Predict agro zone and recommended crop from the submitted environmental features.
+    # This endpoint also saves the input and the recommendation to the database.
     try:
         features_dict = {
             "nitrogen": features.nitrogen,
@@ -771,7 +786,8 @@ async def predict_price(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user),
 ):
-    # Predict crop market price from categorical + geo + calendar features.
+    # Predict crop market price from categorical, location, and date features.
+    # It also saves the request parameters and predicted price as history.
     try:
         # Resolve latitude/longitude from market_locations.csv by market value.
         market_matches = market_locations_df[

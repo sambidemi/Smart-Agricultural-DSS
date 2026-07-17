@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from .database import Base
 
+# User table stores account details and profile settings.
 class User(Base):
     __tablename__ = "users"
 
@@ -15,6 +16,7 @@ class User(Base):
     phone_number = Column(String(15), nullable=False)
 
 
+# FarmInfo table stores farm-specific profile data for each user.
 class FarmInfo(Base):
     __tablename__ = "farm_info"
 
@@ -25,8 +27,8 @@ class FarmInfo(Base):
     soil_type = Column(String)
     water_source = Column(String)
 
-    
 
+# CropInput records the features submitted for crop recommendation.
 class CropInput(Base):
     __tablename__ = "crop_inputs"
 
@@ -43,6 +45,7 @@ class CropInput(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
 
+# RecommendedCrop stores the AI result associated with a CropInput.
 class RecommendedCrop(Base):
     __tablename__ = "recommended_crops"
 
@@ -50,9 +53,10 @@ class RecommendedCrop(Base):
     crop_input_id = Column(Integer, ForeignKey("crop_inputs.id"))
     crop_name = Column(String)
 
-class PriceInput (Base):
+# PriceInput stores market request details submitted by a user.
+class PriceInput(Base):
     __tablename__ = "price_inputs"
-    id = Column (Integer, primary_key =True, index = True)
+    id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     state = Column(String)
     # Use lowercase DB column name to avoid case-sensitive identifier issues.
@@ -62,12 +66,13 @@ class PriceInput (Base):
     category = Column(String)
     commodity = Column(String)
     quantity = Column(Float)
-    unit = Column (String)
+    unit = Column(String)
     year = Column(Integer)
     month = Column(Integer)
     day = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
+# PricePrediction stores the predicted price result for a PriceInput.
 class PricePrediction(Base):
     __tablename__ = "predicted_prices"
     id = Column(Integer, primary_key=True, index=True)
