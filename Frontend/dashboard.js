@@ -402,7 +402,6 @@ class DashboardManager {
 
     redirectToLogin() {
         localStorage.removeItem('agrosense_token');
-        localStorage.removeItem('agrosense_user');
         window.location.href = 'login.html';
     }
 
@@ -1527,7 +1526,6 @@ class DashboardManager {
         this.showToast('Logging out...', 'info');
         setTimeout(() => {
             localStorage.removeItem('agrosense_token');
-            localStorage.removeItem('agrosense_user');
             window.location.href = 'login.html';
         }, 1000);
     }
