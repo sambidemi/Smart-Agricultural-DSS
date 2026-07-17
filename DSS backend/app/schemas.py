@@ -64,5 +64,6 @@ class marketanalysisfeatures (BaseModel):
     commodity: str = Field(..., example = "Maize")
     year: int = Field(..., example = 2025)
     pricetype: str = Field(..., example = "Retail")
+    quantity: float = Field(..., example = 1.0)
     unit: str = Field(..., example = "kg")
     

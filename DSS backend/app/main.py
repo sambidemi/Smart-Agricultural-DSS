@@ -1100,9 +1100,10 @@ def get_price_prediction_history(
 async def market_analysis(
     features: marketanalysisfeatures,
 ):
-    # Aggregate historical market data for a selected commodity/year/pricetype/unit.
+    # Aggregate historical market data for a selected commodity/year/pricetype/quantity/unit.
     try:
         normalized_unit = normalize_market_unit(features.unit)
+        normalized_quantity = round(float(features.quantity), 10)
         market_analysis_df = pd.read_csv(BASE_DIR / "data" / "filtered_crop.csv")
         filtered_df = market_analysis_df.copy()
         price_column = "price (NGN)"
@@ -1113,24 +1114,27 @@ async def market_analysis(
         filtered_df["commodity_normalized"] = filtered_df["commodity"].astype(str).map(normalize_text)
         filtered_df["pricetype_normalized"] = filtered_df["pricetype"].astype(str).map(normalize_text)
         filtered_df["unit_normalized"] = filtered_df["unit"].astype(str).map(normalize_market_unit)
+        filtered_df["quantity"] = pd.to_numeric(filtered_df["quantity"], errors="coerce")
         filtered_df["month"] = filtered_df["month"].astype(str).str.strip()
         filtered_df["year"] = pd.to_numeric(filtered_df["year"], errors="coerce")
         filtered_df[price_column] = pd.to_numeric(filtered_df[price_column], errors="coerce")
 
-        filtered_df = filtered_df.dropna(subset=["year", price_column])
+        filtered_df = filtered_df.dropna(subset=["year", price_column, "quantity"])
+        filtered_df["quantity"] = filtered_df["quantity"].round(10)
         filtered_df["year"] = filtered_df["year"].astype(int)
 
         filtered_df = filtered_df[
             (filtered_df["commodity_normalized"] == normalize_text(features.commodity))
             & (filtered_df["pricetype_normalized"] == normalize_text(features.pricetype))
             & (filtered_df["year"] == features.year)
+            & (filtered_df["quantity"] == normalized_quantity)
             & (filtered_df["unit_normalized"] == normalized_unit)
         ]
 
         if filtered_df.empty:
             raise HTTPException(
                 status_code=404,
-                detail="No market analysis data found for the selected commodity, pricetype, year, and unit",
+                detail="No market analysis data found for the selected commodity, pricetype, year, quantity, and unit",
             )
 
         month_order = [
@@ -1199,6 +1203,8 @@ async def market_analysis(
             "commodity": features.commodity,
             "pricetype": features.pricetype,
             "year": features.year,
+            "quantity": normalized_quantity,
+            "unit": features.unit,
             "total_markets": total_markets,
             "average_price_per_month": average_price_per_month,
             "average_price_across_states": average_price_across_states,

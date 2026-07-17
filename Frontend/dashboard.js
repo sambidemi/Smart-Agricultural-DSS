@@ -124,6 +124,7 @@ class DashboardManager {
             commodity: document.getElementById('marketAnalysisCommodity'),
             pricetype: document.getElementById('marketAnalysisPriceType'),
             year: document.getElementById('marketAnalysisYear'),
+            quantity: document.getElementById('marketAnalysisQuantity'),
             unit: document.getElementById('marketAnalysisUnit')
         };
 
@@ -201,6 +202,28 @@ class DashboardManager {
             Spinach: ['grams'],
             Oranges: ['grams'],
             Onions: ['kilograms', 'grams']
+        };
+
+        this.commodityToQuantityUnitMap = {
+            Bananas: [{ quantity: 1.3, unit: 'KG' }],
+            'Beans (niebe)': [{ quantity: 1.0, unit: 'KG' }],
+            'Beans (red)': [{ quantity: 2.5, unit: 'KG' }, { quantity: 1.2, unit: 'KG' }],
+            'Beans (white)': [{ quantity: 2.5, unit: 'KG' }, { quantity: 1.2, unit: 'KG' }],
+            'Cowpeas (brown)': [{ quantity: 1.0, unit: 'KG' }, { quantity: 100.0, unit: 'KG' }],
+            'Cowpeas (white)': [{ quantity: 1.0, unit: 'KG' }, { quantity: 100.0, unit: 'KG' }],
+            'Groundnuts (shelled)': [{ quantity: 100.0, unit: 'KG' }, { quantity: 1.0, unit: 'KG' }],
+            Maize: [{ quantity: 1.0, unit: 'KG' }],
+            Millet: [{ quantity: 1.0, unit: 'KG' }, { quantity: 100.0, unit: 'KG' }, { quantity: 2.6, unit: 'KG' }, { quantity: 1.4, unit: 'KG' }, { quantity: 2.5, unit: 'KG' }],
+            'Oil (palm)': [{ quantity: 1.0, unit: 'L' }, { quantity: 100.0, unit: 'L' }, { quantity: 750.0, unit: 'ML' }],
+            Onions: [{ quantity: 0.5, unit: 'KG' }, { quantity: 400.0, unit: 'G' }],
+            Oranges: [{ quantity: 400.0, unit: 'G' }],
+            'Rice (local)': [{ quantity: 2.7, unit: 'KG' }, { quantity: 100.0, unit: 'KG' }, { quantity: 1.0, unit: 'KG' }, { quantity: 1.4, unit: 'KG' }, { quantity: 2.5, unit: 'KG' }],
+            'Rice (milled, local)': [{ quantity: 50.0, unit: 'KG' }, { quantity: 100.0, unit: 'KG' }],
+            Sorghum: [{ quantity: 1.0, unit: 'KG' }, { quantity: 2.7, unit: 'KG' }, { quantity: 1.3, unit: 'KG' }, { quantity: 2.5, unit: 'KG' }],
+            Spinach: [{ quantity: 300.0, unit: 'G' }],
+            Tomatoes: [{ quantity: 0.5, unit: 'KG' }],
+            Watermelons: [{ quantity: 2.1, unit: 'KG' }],
+            Yam: [{ quantity: 2.5, unit: 'KG' }, { quantity: 100.0, unit: 'KG' }, { quantity: 100.0, unit: 'Tubers' }, { quantity: 1.0, unit: 'KG' }, { quantity: 3.1, unit: 'KG' }]
         };
 
         this.priceTypeOptions = ['Wholesale', 'Retail'];
@@ -306,6 +329,7 @@ class DashboardManager {
         this.predictFields.category?.addEventListener('change', () => this.handleCategoryChange());
         this.predictFields.commodity?.addEventListener('change', () => this.handleCommodityChange());
         this.marketAnalysisFields.commodity?.addEventListener('change', () => this.handleMarketAnalysisCommodityChange());
+        this.marketAnalysisFields.quantity?.addEventListener('change', () => this.handleMarketAnalysisQuantityChange());
         Object.values(this.predictFields).forEach((field) => {
             if (!field) return;
             field.addEventListener('change', () => this.togglePredictSubmitState());
@@ -1051,13 +1075,34 @@ class DashboardManager {
         this.populateSelect(this.marketAnalysisFields.commodity, commodities, 'Select commodity');
         this.populateSelect(this.marketAnalysisFields.pricetype, this.priceTypeOptions, 'Select price type');
         this.populateSelect(this.marketAnalysisFields.year, this.marketAnalysisYears, 'Select year');
+        this.resetSelect(this.marketAnalysisFields.quantity, 'Select quantity');
         this.resetSelect(this.marketAnalysisFields.unit, 'Select unit');
         this.toggleMarketAnalysisSubmitState();
     }
 
+    formatMarketAnalysisQuantity(value) {
+        const numericValue = Number(value);
+        return Number.isFinite(numericValue) ? numericValue.toFixed(1) : String(value ?? '');
+    }
+
     handleMarketAnalysisCommodityChange() {
         const commodity = this.marketAnalysisFields.commodity?.value || '';
-        const units = this.commodityToUnitsMap[commodity] || [];
+        const quantityOptions = (this.commodityToQuantityUnitMap[commodity] || [])
+            .map((option) => this.formatMarketAnalysisQuantity(option.quantity))
+            .filter((value, index, values) => values.indexOf(value) === index)
+            .sort((a, b) => Number(a) - Number(b));
+        this.populateSelect(this.marketAnalysisFields.quantity, quantityOptions, 'Select quantity');
+        this.resetSelect(this.marketAnalysisFields.unit, 'Select unit');
+        this.toggleMarketAnalysisSubmitState();
+    }
+
+    handleMarketAnalysisQuantityChange() {
+        const commodity = this.marketAnalysisFields.commodity?.value || '';
+        const selectedQuantity = this.formatMarketAnalysisQuantity(this.marketAnalysisFields.quantity?.value || '');
+        const matchingOptions = (this.commodityToQuantityUnitMap[commodity] || [])
+            .filter((option) => this.formatMarketAnalysisQuantity(option.quantity) === selectedQuantity)
+            .map((option) => option.unit);
+        const units = matchingOptions.length ? matchingOptions : (this.commodityToUnitsMap[commodity] || []);
         this.populateSelect(this.marketAnalysisFields.unit, units, 'Select unit');
         this.toggleMarketAnalysisSubmitState();
     }
@@ -1068,6 +1113,7 @@ class DashboardManager {
             this.marketAnalysisFields.commodity?.value,
             this.marketAnalysisFields.pricetype?.value,
             this.marketAnalysisFields.year?.value,
+            this.marketAnalysisFields.quantity?.value,
             this.marketAnalysisFields.unit?.value
         ];
         const isValid = requiredValues.every((value) => Boolean(String(value || '').trim()));
@@ -1090,6 +1136,7 @@ class DashboardManager {
             commodity: this.marketAnalysisFields.commodity.value,
             pricetype: this.marketAnalysisFields.pricetype.value,
             year: Number(this.marketAnalysisFields.year.value),
+            quantity: Number(this.marketAnalysisFields.quantity.value),
             unit: this.marketAnalysisFields.unit.value
         };
 
@@ -1124,6 +1171,8 @@ class DashboardManager {
             { label: 'Commodity', value: response?.commodity || 'N/A' },
             { label: 'Price Type', value: response?.pricetype || 'N/A' },
             { label: 'Year', value: response?.year || 'N/A' },
+            { label: 'Quantity', value: response?.quantity || 'N/A' },
+            { label: 'Unit', value: response?.unit || 'N/A' },
             { label: 'Total Markets', value: this.formatNumber(response?.total_markets) }
         ];
 
